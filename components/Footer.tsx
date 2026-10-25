@@ -90,9 +90,9 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="bg-[#FAF7F2] text-stone-800 font-sans border-t border-[#EFE9DF]">
+    <footer className="bg-[#FAF9F5] text-stone-800 font-sans border-t border-stone-200/80">
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-8">
           {/* Column 1: Brand Info & Social Media */}
           <div className="space-y-4">
@@ -114,7 +114,7 @@ export function Footer() {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noreferrer"
-                className="h-8 w-8 rounded-full bg-white border border-stone-300 hover:border-[#B4395A] hover:text-[#B4395A] flex items-center justify-center transition-colors shadow-2xs"
+                className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
                 aria-label="X (Twitter)"
               >
                 <RiTwitterXFill className="w-3.5 h-3.5" />
@@ -123,7 +123,7 @@ export function Footer() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noreferrer"
-                className="h-8 w-8 rounded-full bg-white border border-stone-300 hover:border-[#B4395A] hover:text-[#B4395A] flex items-center justify-center transition-colors shadow-2xs"
+                className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
                 aria-label="Facebook"
               >
                 <RiFacebookFill className="w-3.5 h-3.5" />
@@ -132,7 +132,7 @@ export function Footer() {
                 href="https://pinterest.com"
                 target="_blank"
                 rel="noreferrer"
-                className="h-8 w-8 rounded-full bg-white border border-stone-300 hover:border-[#B4395A] hover:text-[#B4395A] flex items-center justify-center transition-colors shadow-2xs"
+                className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
                 aria-label="Pinterest"
               >
                 <RiPinterestFill className="w-3.5 h-3.5" />
@@ -141,7 +141,7 @@ export function Footer() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noreferrer"
-                className="h-8 w-8 rounded-full bg-white border border-stone-300 hover:border-[#B4395A] hover:text-[#B4395A] flex items-center justify-center transition-colors shadow-2xs"
+                className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
                 aria-label="Instagram"
               >
                 <RiInstagramLine className="w-3.5 h-3.5" />
@@ -159,7 +159,7 @@ export function Footer() {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-stone-600 hover:text-[#B4395A] transition-colors"
+                    className="text-stone-600 hover:text-[#5B6240] transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -178,7 +178,7 @@ export function Footer() {
                 <li key={cat._id || cat.slug}>
                   <Link
                     href={`/category/${cat.slug}`}
-                    className="text-stone-600 hover:text-[#B4395A] transition-colors"
+                    className="text-stone-600 hover:text-[#5B6240] transition-colors"
                   >
                     {cat.name}
                   </Link>
@@ -197,7 +197,7 @@ export function Footer() {
                 <li key={col._id || col.slug}>
                   <Link
                     href={`/collections/${col.slug}`}
-                    className="text-stone-600 hover:text-[#B4395A] transition-colors"
+                    className="text-stone-600 hover:text-[#5B6240] transition-colors"
                   >
                     {col.name}
                   </Link>
@@ -216,7 +216,7 @@ export function Footer() {
                 <li key={p._id || p.slug}>
                   <Link
                     href={`/policies/${p.slug}`}
-                    className="text-stone-600 hover:text-[#B4395A] transition-colors"
+                    className="text-stone-600 hover:text-[#5B6240] transition-colors"
                   >
                     {p.title}
                   </Link>
@@ -228,9 +228,9 @@ export function Footer() {
       </div>
 
       {/* Bottom Bar: ONLY Centered Copyright Text */}
-      <div className="border-t border-[#EFE9DF] py-5">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-xs text-stone-600">
+      <div className="border-t border-stone-200/80 py-5">
+        <div className="max-w-[1400px] mx-auto px-4 text-center">
+          <p className="text-xs text-stone-500">
             Copyright © 2026 Eclera Cosmetics. All rights reserved.
           </p>
         </div>

@@ -3,10 +3,20 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #5B6240;
+  --primary-hover: #474D32;
+  --primary-dark: #373C27;
+  --primary-light: #F1F3EC;
+  --primary-muted: #D5D9C8;
 }
 
 @theme {
   --font-sans: 'Poppins', sans-serif;
+  --color-primary: #5B6240;
+  --color-primary-hover: #474D32;
+  --color-primary-dark: #373C27;
+  --color-primary-light: #F1F3EC;
+  --color-primary-muted: #D5D9C8;
 }
 
 html, body {

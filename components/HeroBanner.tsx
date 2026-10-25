@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
-import type { Swiper as SwiperType } from "swiper";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 // Swiper core CSS
 import "swiper/css";
@@ -95,7 +93,6 @@ export function HeroBanner() {
   const router = useRouter();
   const [banners, setBanners] = useState<BannerItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
 
   useEffect(() => {
     // Fetch active banners from API
@@ -119,7 +116,7 @@ export function HeroBanner() {
 
   // Full-bleed responsive height container: lower and balanced on mobile
   const containerClasses =
-    "relative w-full h-[220px] sm:h-[340px] md:h-[460px] lg:h-[calc(100dvh-112px)] lg:max-h-[820px] overflow-hidden bg-[#FAF7F2]";
+    "relative w-full h-[220px] sm:h-[340px] md:h-[460px] lg:h-[calc(100dvh-112px)] lg:max-h-[820px] overflow-hidden bg-[#EFF3E8]";
 
   // Loading skeleton placeholder
   if (loading) {
@@ -140,7 +137,7 @@ export function HeroBanner() {
   // Condition 1: If MORE than 1 image -> Render Swiper Slider in full-bleed height
   if (banners.length > 1) {
     return (
-      <section className={`${containerClasses} group`} aria-label="Hero Slider">
+      <section className={containerClasses} aria-label="Hero Slider">
         <Swiper
           modules={[Autoplay]}
           autoplay={{
@@ -150,7 +147,6 @@ export function HeroBanner() {
           }}
           loop={true}
           speed={650}
-          onSwiper={(swiper) => setSwiperInstance(swiper)}
           className="w-full h-full"
         >
           {banners.map((banner, index) => (
@@ -159,27 +155,6 @@ export function HeroBanner() {
             </SwiperSlide>
           ))}
         </Swiper>
-
-        {/* Compact Sleek Navigation: Previous Button */}
-        <button
-          type="button"
-          onClick={() => swiperInstance?.slidePrev()}
-          className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/85 hover:bg-white text-stone-800 hover:text-[#B4395A] backdrop-blur-md shadow-md border border-stone-200/60 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer opacity-80 sm:opacity-90 hover:opacity-100"
-          aria-label="Previous Slide"
-        >
-          <FiChevronLeft className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
-        </button>
-
-        {/* Compact Sleek Navigation: Next Button */}
-        <button
-          type="button"
-          onClick={() => swiperInstance?.slideNext()}
-          className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-white/85 hover:bg-white text-stone-800 hover:text-[#B4395A] backdrop-blur-md shadow-md border border-stone-200/60 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer opacity-80 sm:opacity-90 hover:opacity-100"
-          aria-label="Next Slide"
-        >
-          <FiChevronRight className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
-        </button>
-
       </section>
     );
   }

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { FiChevronRight, FiCalendar, FiShield, FiFileText } from "react-icons/fi";
 import { api } from "@/helper";
 
-export default function PolicyDetailPage() {
+function PolicyDetailContent() {
   const params = useParams();
   const slug = params?.slug as string;
 
@@ -40,7 +40,7 @@ export default function PolicyDetailPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-xs text-stone-500 mb-6">
-          <Link href="/" className="hover:text-[#B4395A] transition-colors">
+          <Link href="/" className="hover:text-[#5B6240] transition-colors">
             Home
           </Link>
           <FiChevronRight className="w-3 h-3 text-stone-400" />
@@ -55,12 +55,12 @@ export default function PolicyDetailPage() {
         <div className="bg-white rounded-xl border border-stone-200 shadow-xs p-6 sm:p-10">
           {loading ? (
             <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-[#B4395A]" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-[#5B6240]" />
               <p className="text-xs text-stone-500 font-medium">Loading policy document...</p>
             </div>
           ) : error || !policy ? (
             <div className="py-16 text-center space-y-3">
-              <div className="h-12 w-12 rounded-full bg-rose-50 text-[#B4395A] mx-auto flex items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-[#F1F3EC] text-[#5B6240] mx-auto flex items-center justify-center">
                 <FiFileText className="w-6 h-6" />
               </div>
               <h2 className="text-base font-bold text-stone-800">Policy Page Not Found</h2>
@@ -69,7 +69,7 @@ export default function PolicyDetailPage() {
               </p>
               <Link
                 href="/"
-                className="inline-block mt-2 px-5 py-2 text-xs font-semibold bg-[#B4395A] text-white rounded-full hover:bg-[#9b2f4c] transition-colors"
+                className="inline-block mt-2 px-5 py-2 text-xs font-semibold bg-[#5B6240] text-white rounded-full hover:bg-[#474D32] transition-colors"
               >
                 Return to Home
               </Link>
@@ -78,11 +78,11 @@ export default function PolicyDetailPage() {
             <article className="space-y-6">
               {/* Header */}
               <header className="border-b border-stone-200 pb-5">
-                <div className="flex items-center gap-2 text-xs font-semibold text-[#B4395A] uppercase tracking-wider mb-1.5">
+                <div className="flex items-center gap-2 text-xs font-semibold text-[#5B6240] uppercase tracking-wider mb-1.5">
                   <FiShield className="w-3.5 h-3.5" />
                   <span>Eclera Official Store Policy</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-stone-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
                   {policy.title}
                 </h1>
                 {policy.updatedAt && (
@@ -116,7 +116,7 @@ export default function PolicyDetailPage() {
                 </div>
                 <a
                   href="mailto:support@eclera.com"
-                  className="px-4 py-2 bg-stone-900 text-white rounded-md font-semibold hover:bg-[#B4395A] transition-colors whitespace-nowrap"
+                  className="px-4 py-2 bg-stone-900 text-white rounded-md font-semibold hover:bg-[#5B6240] transition-colors whitespace-nowrap"
                 >
                   Contact Support
                 </a>
@@ -126,5 +126,19 @@ export default function PolicyDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PolicyDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-[#FAF7F5] min-h-screen py-10 flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-200 border-t-[#5B6240]" />
+        </div>
+      }
+    >
+      <PolicyDetailContent />
+    </Suspense>
   );
 }
