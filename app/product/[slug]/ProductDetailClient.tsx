@@ -68,6 +68,7 @@ interface Product {
   specifications?: ProductSpecificationItem[];
   rating?: number;
   reviewsCount?: number;
+  flipkartUrl?: string;
 }
 
 interface ReviewItem {
@@ -749,6 +750,28 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   <Link href="/cart" className="underline font-bold text-emerald-900">
                     View Bag →
                   </Link>
+                </div>
+              )}
+
+              {/* Marketplace Buy on Flipkart Button (displayed only if flipkartUrl is set) */}
+              {product.flipkartUrl && (
+                <div className="pt-1">
+                  <a
+                    href={product.flipkartUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-11 px-4 bg-white hover:bg-stone-50 border border-stone-300 hover:border-[#2874F0] text-stone-900 flex items-center justify-center gap-2.5 transition-all duration-200 shadow-2xs hover:shadow-xs cursor-pointer group"
+                    title="Buy this product on Flipkart"
+                  >
+                    <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-stone-700 group-hover:text-[#2874F0] transition-colors">
+                      Buy on
+                    </span>
+                    <img
+                      src="/assets/images/flipkart.svg"
+                      alt="Flipkart"
+                      className="h-6 sm:h-7 w-auto max-h-7 object-contain shrink-0"
+                    />
+                  </a>
                 </div>
               )}
             </div>

@@ -33,6 +33,7 @@ interface Product {
   reviewsCount?: number;
   description?: string;
   status?: string;
+  flipkartUrl?: string;
 }
 
 interface Collection {
@@ -474,6 +475,29 @@ function ProductCard({ product, isAdded, onQuickAdd }: ProductCardProps) {
               ({reviewsCount})
             </span>
           </div>
+
+          {/* Flipkart Marketplace Link Button */}
+          {product.flipkartUrl && (
+            <div className="mt-2.5 pt-2 border-t border-stone-100">
+              <a
+                href={product.flipkartUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="w-full py-1.5 px-2 bg-white hover:bg-stone-50 border border-stone-200 hover:border-[#2874F0] flex items-center justify-center gap-1.5 transition-colors shadow-2xs group/fk cursor-pointer"
+                title="Buy on Flipkart"
+              >
+                <span className="text-[11px] font-medium text-stone-600 group-hover/fk:text-[#2874F0]">
+                  Buy on
+                </span>
+                <img
+                  src="/assets/images/flipkart.svg"
+                  alt="Flipkart"
+                  className="h-4 sm:h-4.5 w-auto object-contain shrink-0"
+                />
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>

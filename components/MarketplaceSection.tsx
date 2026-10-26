@@ -29,7 +29,7 @@ export function MarketplaceSection() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Title */}
         <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-stone-900 tracking-tight">
-          Available on Marketplaces
+          We&apos;re available on marketplaces
         </h2>
 
         {/* Short Description */}
@@ -44,7 +44,7 @@ export function MarketplaceSection() {
             target="_blank"
             rel="noreferrer"
             title="Shop Eclera on Meesho"
-            className="inline-flex items-center p-1 rounded-lg border border-transparent hover:border-stone-400 transition-colors cursor-pointer"
+            className="inline-flex items-center p-1 cursor-pointer"
           >
             <img
               src="/assets/images/meesho.svg"
@@ -54,7 +54,7 @@ export function MarketplaceSection() {
           </a>
 
           {/* Flipkart (Display only, non-clickable) */}
-          <div className="inline-flex items-center p-1 rounded-lg border border-transparent cursor-default select-none">
+          <div className="inline-flex items-center p-1 cursor-default select-none">
             <img
               src="/assets/images/flipkart.svg"
               alt="Flipkart"
