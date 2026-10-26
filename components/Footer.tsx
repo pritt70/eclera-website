@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  RiTwitterXFill,
   RiFacebookFill,
-  RiPinterestFill,
   RiInstagramLine,
+  RiThreadsFill,
+  RiYoutubeFill,
 } from "react-icons/ri";
 import { api } from "@/helper";
 
@@ -60,6 +60,8 @@ export function Footer() {
     { name: "Contact Us", href: "/contact" },
   ];
 
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+
   useEffect(() => {
     // Fetch live policies from Admin module
     api("policies", undefined, "GET")
@@ -87,6 +89,15 @@ export function Footer() {
         }
       })
       .catch(() => {});
+
+    // Fetch live dynamic social media links
+    api("social", undefined, "GET")
+      .then((res) => {
+        if (res && res.status && res.data?.links) {
+          setSocialLinks(res.data.links);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -108,45 +119,50 @@ export function Footer() {
               Clean, vegan, and dermatologically tested luxury skincare and cosmetics formulations designed for your everyday glow.
             </p>
 
-            {/* Social Media icons under brand info */}
-            <div className="flex items-center gap-2.5 pt-2 text-stone-700">
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noreferrer"
-                className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
-                aria-label="X (Twitter)"
-              >
-                <RiTwitterXFill className="w-3.5 h-3.5" />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noreferrer"
-                className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
-                aria-label="Facebook"
-              >
-                <RiFacebookFill className="w-3.5 h-3.5" />
-              </a>
-              <a
-                href="https://pinterest.com"
-                target="_blank"
-                rel="noreferrer"
-                className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
-                aria-label="Pinterest"
-              >
-                <RiPinterestFill className="w-3.5 h-3.5" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
-                aria-label="Instagram"
-              >
-                <RiInstagramLine className="w-3.5 h-3.5" />
-              </a>
-            </div>
+            {/* Dynamic Social Media icons under brand info - strictly limited to 4: Instagram, Facebook, Threads, YouTube (only rendered if link is configured) */}
+            {(() => {
+              const footerChannels = [
+                {
+                  key: "instagram",
+                  label: "Instagram",
+                  icon: <RiInstagramLine className="w-3.5 h-3.5" />,
+                },
+                {
+                  key: "facebook",
+                  label: "Facebook",
+                  icon: <RiFacebookFill className="w-3.5 h-3.5" />,
+                },
+                {
+                  key: "thread",
+                  label: "Threads",
+                  icon: <RiThreadsFill className="w-3.5 h-3.5" />,
+                },
+                {
+                  key: "youtube",
+                  label: "YouTube",
+                  icon: <RiYoutubeFill className="w-3.5 h-3.5" />,
+                },
+              ].filter((item) => Boolean(socialLinks[item.key] && socialLinks[item.key].trim()));
+
+              if (footerChannels.length === 0) return null;
+
+              return (
+                <div className="flex items-center gap-2.5 pt-2 text-stone-700">
+                  {footerChannels.map((item) => (
+                    <a
+                      key={item.key}
+                      href={socialLinks[item.key]}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="h-8 w-8 rounded-full bg-white border border-stone-200 hover:bg-[#5B6240] hover:border-[#5B6240] hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs"
+                      aria-label={item.label}
+                    >
+                      {item.icon}
+                    </a>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Column 2: QUICK LINKS */}

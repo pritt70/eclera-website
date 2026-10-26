@@ -4,6 +4,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import ReviewNotificationToast from "@/components/ReviewNotificationToast";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
         </Suspense>
         <main className="flex-1 min-h-[50vh]">{children}</main>
         <Footer />
+        <ReviewNotificationToast />
       </body>
     </html>
   );

@@ -24,3 +24,28 @@ html, body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* Left-aligned to main container, full bleed across right edge */
+.social-feed-container {
+  padding-left: 1rem;
+  padding-right: 0;
+}
+
+@media (min-width: 640px) {
+  .social-feed-container {
+    padding-left: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .social-feed-container {
+    padding-left: 2rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .social-feed-container {
+    padding-left: calc((100vw - 1400px) / 2 + 2rem);
+  }
+}
+

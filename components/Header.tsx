@@ -172,7 +172,7 @@ export function Header() {
               </Link>
             </div>
 
-            {/* Simple Desktop Navigation Links: Home, Collections, Shop */}
+            {/* Simple Desktop Navigation Links: Home, Categories, Shop */}
             <nav className="hidden lg:flex items-center space-x-10">
               <Link
                 href="/"
@@ -184,12 +184,12 @@ export function Header() {
               </Link>
 
               <Link
-                href="/collections"
+                href="/categories"
                 className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-[#5B6240] ${
-                  pathname.startsWith("/collections") ? "text-[#5B6240] font-bold" : "text-stone-700"
+                  pathname.startsWith("/categories") ? "text-[#5B6240] font-bold" : "text-stone-700"
                 }`}
               >
-                Collections
+                Categories
               </Link>
 
               <Link
@@ -351,7 +351,7 @@ export function Header() {
             </button>
           </div>
 
-          {/* Drawer Content: ONLY 3 Menus (Home, Collections, Shop) */}
+          {/* Drawer Content: ONLY 3 Menus (Home, Categories, Shop) */}
           <div className="flex-1 px-4 py-5 space-y-2 overflow-y-auto">
             <Link
               href="/"
@@ -366,15 +366,15 @@ export function Header() {
             </Link>
 
             <Link
-              href="/collections"
+              href="/categories"
               onClick={() => setMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded text-xs font-bold tracking-wider uppercase transition-all ${
-                pathname.startsWith("/collections")
+                pathname.startsWith("/categories")
                   ? "bg-[#5B6240] text-white shadow-xs"
                   : "text-stone-800 hover:bg-stone-50 hover:text-[#5B6240]"
               }`}
             >
-              Collections
+              Categories
             </Link>
 
             <Link
