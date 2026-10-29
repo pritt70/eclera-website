@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import {
   FiChevronRight,
+  FiChevronDown,
   FiShoppingBag,
   FiCheck,
   FiStar,
@@ -13,6 +14,7 @@ import {
   FiImage,
 } from "react-icons/fi";
 import { api } from "@/helper";
+import { ProductCard } from "@/components/ProductCard";
 
 interface ProductImage {
   url?: string;
@@ -57,6 +59,33 @@ export default function CategoryProductsClient({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc" | "rating">("featured");
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  const SORT_OPTIONS: { id: "featured" | "price-asc" | "price-desc" | "rating"; label: string }[] = [
+    { id: "featured", label: "Featured" },
+    { id: "price-asc", label: "Price: Low to High" },
+    { id: "price-desc", label: "Price: High to Low" },
+    { id: "rating", label: "Highest Rated" },
+  ];
+
+  // Close custom sort dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(e.target as Node)
+      ) {
+        setSortDropdownOpen(false);
+      }
+    };
+    if (sortDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sortDropdownOpen]);
 
   useEffect(() => {
     let isMounted = true;
@@ -118,6 +147,17 @@ export default function CategoryProductsClient({ slug }: { slug: string }) {
   const handleQuickAddToCart = (product: Product, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    const customer = typeof window !== "undefined" ? localStorage.getItem("eclera_customer") : null;
+    if (!customer) {
+      try {
+        localStorage.setItem("eclera_pending_quick_add", JSON.stringify(product));
+      } catch {}
+      window.dispatchEvent(
+        new CustomEvent("eclera_open_auth_modal", { detail: { mode: "login" } })
+      );
+      return;
+    }
 
     try {
       const existing = localStorage.getItem("eclera_cart");
@@ -203,12 +243,7 @@ export default function CategoryProductsClient({ slug }: { slug: string }) {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-stone-900 tracking-tight">
             {category?.name || "Category Products"}
           </h1>
-          <div className="w-16 sm:w-20 h-[3.5px] bg-[#5B6240] rounded-full mt-3.5 sm:mt-4 mb-3" />
-          {category?.description && category.description.trim() ? (
-            <p className="max-w-xl text-xs sm:text-sm text-stone-600 leading-relaxed">
-              {category.description.trim()}
-            </p>
-          ) : null}
+          <div className="w-16 sm:w-20 h-[3.5px] bg-[#5B6240] rounded-full mt-3.5 sm:mt-4" />
         </div>
       </section>
 
@@ -220,22 +255,58 @@ export default function CategoryProductsClient({ slug }: { slug: string }) {
             {sortedProducts.length === 1 ? "Product" : "Products"}
           </div>
 
-          <div className="flex items-center gap-2">
-            <label htmlFor="prod-sort" className="text-xs text-stone-500 font-medium hidden sm:inline flex items-center gap-1">
-              <FiSliders className="w-3.5 h-3.5 text-stone-400" />
-              <span>Sort by:</span>
-            </label>
-            <select
-              id="prod-sort"
-              value={sortBy}
-              onChange={(e: any) => setSortBy(e.target.value)}
-              className="text-xs bg-stone-50 border border-stone-200 px-3 py-2 text-stone-800 focus:border-[#5B6240] focus:bg-white focus:outline-none transition-colors cursor-pointer"
-            >
-              <option value="featured">Featured</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="rating">Customer Rating</option>
-            </select>
+          {/* Right Side: Luxury Custom Sort Dropdown */}
+          <div className="relative" ref={sortDropdownRef}>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-stone-500 font-medium tracking-wide hidden sm:inline">
+                Sort by:
+              </span>
+              <button
+                type="button"
+                onClick={() => setSortDropdownOpen((prev) => !prev)}
+                className="inline-flex items-center justify-between gap-3 min-w-[145px] sm:min-w-[170px] px-3.5 py-2 bg-white hover:bg-stone-50/80 border border-stone-200 hover:border-stone-300 text-xs font-semibold text-stone-900 tracking-wide transition-all shadow-2xs cursor-pointer select-none rounded-none focus:outline-none focus:border-[#5B6240]"
+                aria-haspopup="listbox"
+                aria-expanded={sortDropdownOpen}
+              >
+                <span>
+                  {SORT_OPTIONS.find((o) => o.id === sortBy)?.label || "Featured"}
+                </span>
+                <FiChevronDown
+                  className={`w-3.5 h-3.5 text-stone-500 transition-transform duration-200 ${
+                    sortDropdownOpen ? "rotate-180 text-[#5B6240]" : ""
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Popover Menu with Active Checkmark */}
+            {sortDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-48 sm:w-52 bg-white border border-stone-200 shadow-xl rounded-none py-1 z-30 animate-in fade-in zoom-in-95 duration-150">
+                {SORT_OPTIONS.map((opt) => {
+                  const isSelected = sortBy === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        setSortBy(opt.id);
+                        setSortDropdownOpen(false);
+                      }}
+                      className={`w-full px-3.5 py-2 text-left text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                        isSelected
+                          ? "bg-[#FAF7F5] font-semibold text-[#5B6240]"
+                          : "text-stone-700 hover:bg-stone-50 font-normal"
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                      {isSelected && (
+                        <FiCheck className="w-3.5 h-3.5 text-[#5B6240]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -274,137 +345,14 @@ export default function CategoryProductsClient({ slug }: { slug: string }) {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {sortedProducts.map((product) => {
-              const primaryImage =
-                product.images?.[0]?.publicUrl || product.images?.[0]?.url;
-              const hasDiscount =
-                Boolean(product.comparePrice && product.comparePrice > product.price);
-              const discountPercent = hasDiscount
-                ? Math.round(
-                    (((product.comparePrice as number) - product.price) /
-                      (product.comparePrice as number)) *
-                      100
-                  )
-                : 0;
-
-              return (
-                <div
-                  key={product._id}
-                  className="group flex flex-col bg-white border border-stone-200 hover:border-[#5B6240] transition-all duration-300 shadow-2xs hover:shadow-md overflow-hidden"
-                >
-                  {/* Product Image & Badges */}
-                  <Link
-                    href={`/product/${product.slug}`}
-                    className="relative aspect-square w-full bg-[#FAF9EB] overflow-hidden flex items-center justify-center block"
-                  >
-                    {primaryImage ? (
-                      <img
-                        src={primaryImage}
-                        alt={product.name}
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-stone-300">
-                        <FiImage className="w-10 h-10 mb-1" />
-                        <span className="text-[10px] uppercase tracking-wider text-stone-400">
-                          Eclera
-                        </span>
-                      </div>
-                    )}
-
-                    {hasDiscount && (
-                      <span className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider shadow-2xs">
-                        {discountPercent}% OFF
-                      </span>
-                    )}
-                  </Link>
-
-                  {/* Product Info */}
-                  <div className="p-3.5 sm:p-4 flex flex-col flex-1 justify-between bg-white">
-                    <div>
-                      {/* Rating */}
-                      <div className="flex items-center gap-1 mb-1.5">
-                        <div className="flex items-center text-amber-500">
-                          <FiStar className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                        </div>
-                        <span className="text-xs font-semibold text-stone-800">
-                          {product.rating || 4.8}
-                        </span>
-                        <span className="text-[11px] text-stone-400">
-                          ({product.reviewsCount || 42})
-                        </span>
-                      </div>
-
-                      {/* Product Title */}
-                      <Link href={`/product/${product.slug}`}>
-                        <h3 className="text-xs sm:text-sm font-semibold text-stone-900 group-hover:text-[#5B6240] transition-colors line-clamp-2 leading-snug">
-                          {product.name}
-                        </h3>
-                      </Link>
-
-                      {/* Pricing */}
-                      <div className="mt-2.5 flex items-baseline gap-2">
-                        <span className="text-sm sm:text-base font-bold text-stone-900">
-                          ₹{product.price.toLocaleString("en-IN")}
-                        </span>
-                        {hasDiscount && (
-                          <span className="text-xs text-stone-400 line-through">
-                            ₹{product.comparePrice?.toLocaleString("en-IN")}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Actions: Add to Bag and Marketplace Button */}
-                    <div className="mt-3.5 pt-2.5 border-t border-stone-100 space-y-2">
-                      <button
-                        type="button"
-                        onClick={(e) => handleQuickAddToCart(product, e)}
-                        className={`w-full py-2 px-3 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                          addedProductId === product._id
-                            ? "bg-emerald-600 text-white"
-                            : "bg-[#5B6240] hover:bg-[#474D32] text-white"
-                        }`}
-                      >
-                        {addedProductId === product._id ? (
-                          <>
-                            <FiCheck className="w-3.5 h-3.5" />
-                            <span>Added to Bag</span>
-                          </>
-                        ) : (
-                          <>
-                            <FiShoppingBag className="w-3.5 h-3.5" />
-                            <span>Add to Bag</span>
-                          </>
-                        )}
-                      </button>
-
-                      {/* Buy on Flipkart Button (if set in admin panel) */}
-                      {product.flipkartUrl && (
-                        <a
-                          href={product.flipkartUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="w-full py-1.5 px-2 bg-white hover:bg-stone-50 border border-stone-200 hover:border-[#2874F0] flex items-center justify-center gap-1.5 transition-colors shadow-2xs group/fk cursor-pointer"
-                          title="Buy on Flipkart"
-                        >
-                          <span className="text-[11px] font-medium text-stone-600 group-hover/fk:text-[#2874F0]">
-                            Buy on
-                          </span>
-                          <img
-                            src="/assets/images/flipkart.svg"
-                            alt="Flipkart"
-                            className="h-4 sm:h-4.5 w-auto object-contain shrink-0"
-                          />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {sortedProducts.map((product) => (
+              <ProductCard
+                key={product._id}
+                product={product}
+                isAdded={addedProductId === product._id}
+                onQuickAdd={handleQuickAddToCart}
+              />
+            ))}
           </div>
         )}
       </div>

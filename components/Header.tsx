@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -35,6 +35,7 @@ export function Header() {
   const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
   const [customer, setCustomer] = useState<any | null>(null);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement>(null);
 
   // Sync cartCount with localStorage and listen for updates
   useEffect(() => {
@@ -106,6 +107,21 @@ export function Header() {
     window.dispatchEvent(new Event("eclera_customer_auth_changed"));
   };
 
+  // Close user dropdown when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    if (userDropdownOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [userDropdownOpen]);
+
   // Detect scroll for sleek sticky header styling
   useEffect(() => {
     const handleScroll = () => {
@@ -132,10 +148,32 @@ export function Header() {
     };
   }, [mobileMenuOpen]);
 
+  // Dynamically update site header height CSS variable for sticky sidebars
+  const headerContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = headerContainerRef.current;
+    if (!el) return;
+
+    const updateHeight = () => {
+      const h = el.offsetHeight || 112;
+      document.documentElement.style.setProperty("--site-header-height", `${h}px`);
+    };
+
+    updateHeight();
+    const ro = new ResizeObserver(updateHeight);
+    ro.observe(el);
+    window.addEventListener("resize", updateHeight);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
+
   return (
     <>
       {/* Sticky Header Container (Keeps Announcement Bar and Header fixed on scroll) */}
-      <div className="sticky top-0 z-40 w-full">
+      <div ref={headerContainerRef} className="sticky top-0 z-40 w-full">
         {/* Top Announcement Bar */}
         <AnnouncementBar />
 
@@ -193,6 +231,15 @@ export function Header() {
               </Link>
 
               <Link
+                href="/collections"
+                className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-[#5B6240] ${
+                  pathname.startsWith("/collections") ? "text-[#5B6240] font-bold" : "text-stone-700"
+                }`}
+              >
+                Collections
+              </Link>
+
+              <Link
                 href="/shop"
                 className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-[#5B6240] ${
                   pathname.startsWith("/shop") ? "text-[#5B6240] font-bold" : "text-stone-700"
@@ -206,58 +253,40 @@ export function Header() {
             <div className="flex items-center space-x-1.5 sm:space-x-3 text-stone-700">
               {/* User Account / Profile (Desktop & Tablet) */}
               {customer ? (
-                <div className="relative hidden sm:inline-block">
+                <div className="relative hidden sm:inline-block" ref={userDropdownRef}>
                   <button
                     type="button"
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-1.5 p-1.5 sm:px-2.5 sm:py-1.5 text-stone-800 hover:text-[#5B6240] hover:bg-stone-50 rounded-none border border-stone-200 transition-colors cursor-pointer"
-                    title={`Logged in as ${customer.fullName || "Customer"}`}
+                    className="p-2 text-stone-700 hover:text-[#5B6240] hover:bg-stone-50 rounded-none transition-colors hidden sm:inline-flex items-center gap-1 cursor-pointer"
+                    title="My Account"
+                    aria-label="User Account"
                   >
-                    <div className="w-5 h-5 bg-[#5B6240] text-white rounded-none flex items-center justify-center text-[10px] font-bold uppercase">
-                      {(customer.fullName || "C")[0]}
-                    </div>
-                    <span className="text-xs font-semibold max-w-[100px] truncate hidden md:inline">
-                      {customer.firstName || customer.fullName?.split(" ")[0] || "Account"}
-                    </span>
-                    <FiChevronDown className="w-3.5 h-3.5 text-stone-500" />
+                    <FiUser className="w-5 h-5" />
+                    <FiChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${userDropdownOpen ? "rotate-180 text-[#5B6240]" : "text-stone-500"}`} />
                   </button>
 
-                  {/* Customer Dropdown Menu */}
+                  {/* Customer Dropdown Menu - ONLY My Profile and Logout */}
                   {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white border border-stone-200 shadow-xl rounded-none py-2 z-50 animate-in fade-in slide-in-from-top-1">
-                      <div className="px-4 py-2 border-b border-stone-100">
-                        <p className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider">
-                          Signed in as
-                        </p>
-                        <p className="text-xs font-bold text-stone-900 truncate">
-                          {customer.fullName || "Customer"}
-                        </p>
-                        <p className="text-[11px] text-stone-500 truncate">
-                          +91 {customer.phone}
-                        </p>
-                      </div>
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-stone-200 shadow-xl rounded-none py-1 z-50 animate-in fade-in slide-in-from-top-1">
+                      <Link
+                        href="/account"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-stone-800 hover:bg-[#FAF9F5] hover:text-[#5B6240] transition-colors"
+                      >
+                        <FiUser className="w-4 h-4 text-[#5B6240]" />
+                        <span>My Profile</span>
+                      </Link>
 
-                      <div className="py-1">
-                        <Link
-                          href="/account"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF9F5] hover:text-[#5B6240] transition-colors"
-                        >
-                          <FiUser className="w-3.5 h-3.5" />
-                          <span>My Profile & Orders</span>
-                        </Link>
-                      </div>
+                      <div className="border-t border-stone-100 my-0.5" />
 
-                      <div className="pt-1 border-t border-stone-100">
-                        <button
-                          type="button"
-                          onClick={handleLogout}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
-                        >
-                          <FiLogOut className="w-3.5 h-3.5" />
-                          <span>Log Out</span>
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+                      >
+                        <FiLogOut className="w-4 h-4 text-red-500" />
+                        <span>Logout</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -378,6 +407,18 @@ export function Header() {
             </Link>
 
             <Link
+              href="/collections"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block px-4 py-3 rounded text-xs font-bold tracking-wider uppercase transition-all ${
+                pathname.startsWith("/collections")
+                  ? "bg-[#5B6240] text-white shadow-xs"
+                  : "text-stone-800 hover:bg-stone-50 hover:text-[#5B6240]"
+              }`}
+            >
+              Collections
+            </Link>
+
+            <Link
               href="/shop"
               onClick={() => setMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded text-xs font-bold tracking-wider uppercase transition-all ${
@@ -394,17 +435,14 @@ export function Header() {
           <div className="p-4 border-t border-[#ECECDA] bg-[#F9F9EB] space-y-3">
             {customer ? (
               <div className="space-y-2">
-                <div className="px-3 py-2 bg-white border border-[#D0D7C4] rounded-none">
-                  <p className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider">
-                    Logged In
-                  </p>
-                  <p className="text-xs font-bold text-stone-900 truncate">
-                    {customer.fullName || "Customer"}
-                  </p>
-                  <p className="text-[11px] text-stone-500">
-                    +91 {customer.phone}
-                  </p>
-                </div>
+                <Link
+                  href="/account"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full h-10 bg-white border border-[#5B6240] text-[#5B6240] hover:bg-[#5B6240] hover:text-white text-xs font-semibold rounded-none flex items-center justify-center gap-2 transition-colors shadow-2xs"
+                >
+                  <FiUser className="w-4 h-4" />
+                  <span>My Profile</span>
+                </Link>
                 <button
                   type="button"
                   onClick={() => {
@@ -414,7 +452,7 @@ export function Header() {
                   className="w-full h-10 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-none flex items-center justify-center gap-2 transition-colors shadow-2xs cursor-pointer"
                 >
                   <FiLogOut className="w-4 h-4" />
-                  <span>Log Out</span>
+                  <span>Logout</span>
                 </button>
               </div>
             ) : (

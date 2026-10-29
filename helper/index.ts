@@ -21,7 +21,12 @@ export async function api(endpoint: string, data?: any, method: string = "POST")
         }
 
         const response = await fetch(url, options);
-        return await response.json();
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch {
+            return { status: false, message: text || `HTTP ${response.status} Error` };
+        }
     } catch (err: any) {
         console.error(`API Error [${endpoint}]:`, err?.message);
         return { status: false, message: err?.message || "Network request failed" };

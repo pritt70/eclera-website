@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { FiArrowRight, FiPackage } from "react-icons/fi";
+import { FiArrowRight, FiPackage, FiChevronRight } from "react-icons/fi";
 import { api } from "@/helper";
 
 export interface CategoryItem {
@@ -100,16 +100,28 @@ export default function CategoriesClient() {
 
   return (
     <div className="w-full bg-[#FAF7F5] min-h-screen pb-16 sm:pb-24">
-      {/* Top Header Section: Only Title and Description */}
-      <section className="bg-white border-b border-stone-200 py-10 sm:py-14 md:py-16">
+      {/* Breadcrumb Navigation */}
+      <div className="bg-white border-b border-stone-200">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+          <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-xs text-stone-500 font-medium">
+            <Link href="/" className="hover:text-[#5B6240] transition-colors">
+              Home
+            </Link>
+            <FiChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+            <span className="text-stone-900 font-semibold uppercase tracking-wider text-[11px]">
+              Categories
+            </span>
+          </nav>
+        </div>
+      </div>
+
+      {/* Top Header Section: Only Title */}
+      <section className="bg-white border-b border-stone-200 py-10 sm:py-14">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-stone-900 tracking-tight">
             Explore All Categories
           </h1>
-          <div className="w-16 sm:w-20 h-[3.5px] bg-[#5B6240] rounded-full mt-3.5 sm:mt-4 mb-4" />
-          <p className="max-w-2xl text-xs sm:text-sm md:text-base text-stone-600 leading-relaxed">
-            Discover our complete range of clean, dermatologically formulated skincare, cleansers, serums, and luxury cosmetic essentials crafted for Indian skin.
-          </p>
+          <div className="w-16 sm:w-20 h-[3.5px] bg-[#5B6240] rounded-none mt-3.5 sm:mt-4" />
         </div>
       </section>
 

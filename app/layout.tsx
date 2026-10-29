@@ -5,6 +5,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import ReviewNotificationToast from "@/components/ReviewNotificationToast";
+import { PromoPopup } from "@/components/PromoPopup";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
         <main className="flex-1 min-h-[50vh]">{children}</main>
         <Footer />
         <ReviewNotificationToast />
+        <PromoPopup />
       </body>
     </html>
   );

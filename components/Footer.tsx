@@ -101,7 +101,7 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="bg-[#FAF9F5] text-stone-800 font-sans border-t border-stone-200/80">
+    <footer className="bg-[#FAF9F5] text-stone-800 border-t border-stone-200/80">
       {/* Main Footer Content */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-8">

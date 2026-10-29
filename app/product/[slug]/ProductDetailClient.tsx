@@ -19,6 +19,7 @@ import {
   FiEdit3,
 } from "react-icons/fi";
 import { api } from "@/helper";
+import { ProductCard } from "@/components/ProductCard";
 
 interface ProductImage {
   url?: string;
@@ -69,6 +70,7 @@ interface Product {
   rating?: number;
   reviewsCount?: number;
   flipkartUrl?: string;
+  relatedProducts?: any[];
 }
 
 interface ReviewItem {
@@ -92,6 +94,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [addedFeedback, setAddedFeedback] = useState(false);
+  const [addedRelatedProductId, setAddedRelatedProductId] = useState<string | null>(null);
 
   // Accordion state: Product Description is open by default as requested; specifications & reviews collapsed
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
@@ -284,18 +287,41 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
   const handleAddToCart = () => {
     if (!product || (product.stock ?? 0) <= 0) return;
 
+    const customer = typeof window !== "undefined" ? localStorage.getItem("eclera_customer") : null;
+    const primaryImage =
+      product.images?.[activeImageIndex]?.publicUrl ||
+      product.images?.[activeImageIndex]?.url ||
+      product.images?.[0]?.publicUrl ||
+      product.images?.[0]?.url ||
+      "";
+
+    if (!customer) {
+      try {
+        localStorage.setItem(
+          "eclera_pending_quick_add",
+          JSON.stringify({
+            _id: product._id,
+            name: product.name,
+            slug: product.slug,
+            price: product.price,
+            comparePrice: product.comparePrice || product.price,
+            image: primaryImage,
+            quantity: quantity,
+          })
+        );
+      } catch {}
+      window.dispatchEvent(
+        new CustomEvent("eclera_open_auth_modal", { detail: { mode: "login" } })
+      );
+      return;
+    }
+
     try {
       const existing = localStorage.getItem("eclera_cart");
       let cart = existing ? JSON.parse(existing) : [];
       if (!Array.isArray(cart)) cart = [];
 
       const existingIndex = cart.findIndex((item: any) => item._id === product._id);
-      const primaryImage =
-        product.images?.[activeImageIndex]?.publicUrl ||
-        product.images?.[activeImageIndex]?.url ||
-        product.images?.[0]?.publicUrl ||
-        product.images?.[0]?.url ||
-        "";
 
       if (existingIndex > -1) {
         // Product already in cart: Increase quantity by selected quantity
@@ -323,6 +349,57 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
       }, 2500);
     } catch (err) {
       console.error("Failed to add to cart:", err);
+    }
+  };
+
+  // Quick Cart Add for You Might Also Like section
+  const handleQuickAddRelatedProduct = (relProd: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const customer = typeof window !== "undefined" ? localStorage.getItem("eclera_customer") : null;
+    if (!customer) {
+      try {
+        localStorage.setItem("eclera_pending_quick_add", JSON.stringify(relProd));
+      } catch {}
+      window.dispatchEvent(
+        new CustomEvent("eclera_open_auth_modal", { detail: { mode: "login" } })
+      );
+      return;
+    }
+
+    try {
+      const existing = localStorage.getItem("eclera_cart");
+      let cart = existing ? JSON.parse(existing) : [];
+      if (!Array.isArray(cart)) cart = [];
+
+      const existingIndex = cart.findIndex((item: any) => item._id === relProd._id);
+      const primaryImage =
+        relProd.images?.[0]?.publicUrl || relProd.images?.[0]?.url || "";
+
+      if (existingIndex > -1) {
+        cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+      } else {
+        cart.push({
+          _id: relProd._id,
+          name: relProd.name,
+          slug: relProd.slug,
+          price: relProd.price,
+          comparePrice: relProd.comparePrice || relProd.price,
+          image: primaryImage,
+          quantity: 1,
+        });
+      }
+
+      localStorage.setItem("eclera_cart", JSON.stringify(cart));
+      window.dispatchEvent(new Event("eclera_cart_updated"));
+
+      setAddedRelatedProductId(relProd._id);
+      setTimeout(() => {
+        setAddedRelatedProductId(null);
+      }, 2000);
+    } catch (err) {
+      console.error("Failed to add related product to cart:", err);
     }
   };
 
@@ -666,7 +743,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                     {stockInfo.label}
                   </span>
                 </div>
-                <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-stone-500">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
                   {stockInfo.stage === "critical"
                     ? "Limited"
                     : stockInfo.stage === "warning"
@@ -1069,7 +1146,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                           type="text"
                           value={formCountry}
                           onChange={(e) => setFormCountry(e.target.value)}
-                          placeholder="e.g. India, United States, UAE"
+                          placeholder="Enter your country"
                           required
                           className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#5B6240]"
                         />
@@ -1085,7 +1162,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                         rows={4}
                         value={formMessage}
                         onChange={(e) => setFormMessage(e.target.value)}
-                        placeholder="Describe how the formulation felt, skin texture improvements, hydration results, etc."
+                        placeholder="Enter your review details"
                         required
                         className="w-full px-3.5 py-2.5 bg-white border border-stone-300 text-xs sm:text-sm text-stone-900 focus:outline-none focus:border-[#5B6240]"
                       />
@@ -1148,7 +1225,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                               style={{ width: `${pct}%` }}
                             />
                           </div>
-                          <span className="w-10 text-right text-stone-500 font-mono">
+                          <span className="w-10 text-right text-stone-500 font-medium">
                             {count}
                           </span>
                         </div>
@@ -1247,6 +1324,32 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
           )}
         </div>
       </section>
+
+      {/* You Might Also Like (Related Products) */}
+      {Array.isArray(product.relatedProducts) && product.relatedProducts.length > 0 && (
+        <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 sm:mt-16">
+          <div className="border-t border-stone-200 pt-10 sm:pt-14">
+            <div className="mb-6 sm:mb-8 text-center sm:text-left">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#5B6240] font-semibold block mb-1">
+                Curated For You
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+                You Might Also Like
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {product.relatedProducts.map((relProd: any) => (
+                <ProductCard
+                  key={relProd._id || relProd.slug}
+                  product={relProd}
+                  isAdded={addedRelatedProductId === relProd._id}
+                  onQuickAdd={handleQuickAddRelatedProduct}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

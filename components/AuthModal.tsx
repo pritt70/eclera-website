@@ -160,6 +160,43 @@ export function AuthModal({
           setCookie("eclera_customer_token", token, 7);
         }
 
+        // Automatically fulfill any pending quick add to cart
+        try {
+          const pending = localStorage.getItem("eclera_pending_quick_add");
+          if (pending) {
+            const prod = JSON.parse(pending);
+            localStorage.removeItem("eclera_pending_quick_add");
+            const existing = localStorage.getItem("eclera_cart");
+            let cart = existing ? JSON.parse(existing) : [];
+            if (!Array.isArray(cart)) cart = [];
+
+            const primaryImage =
+              prod.images?.[0]?.publicUrl ||
+              prod.images?.[0]?.url ||
+              prod.image ||
+              "";
+
+            const idx = cart.findIndex((i: any) => i._id === prod._id);
+            if (idx > -1) {
+              cart[idx].quantity = (cart[idx].quantity || 1) + (prod.quantity || 1);
+            } else {
+              cart.push({
+                _id: prod._id,
+                name: prod.name,
+                slug: prod.slug,
+                price: prod.price,
+                comparePrice: prod.comparePrice || prod.price,
+                image: primaryImage,
+                quantity: prod.quantity || 1,
+              });
+            }
+            localStorage.setItem("eclera_cart", JSON.stringify(cart));
+            window.dispatchEvent(new Event("eclera_cart_updated"));
+          }
+        } catch (e) {
+          console.error("Failed to fulfill pending quick add:", e);
+        }
+
         // Notify entire app of auth state change
         window.dispatchEvent(new Event("eclera_customer_auth_changed"));
 
@@ -312,7 +349,7 @@ export function AuthModal({
                     id="auth-fullname"
                     type="text"
                     required
-                    placeholder="e.g. Priya Sharma"
+                    placeholder="Enter your name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     disabled={loading}
@@ -340,7 +377,7 @@ export function AuthModal({
                   inputMode="numeric"
                   maxLength={10}
                   required
-                  placeholder="Enter 10-digit mobile number"
+                  placeholder="Enter your mobile number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ""))}
                   disabled={loading}
@@ -365,7 +402,7 @@ export function AuthModal({
                   <input
                     id="auth-email"
                     type="email"
-                    placeholder="e.g. name@example.com"
+                    placeholder="Enter your email id"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
