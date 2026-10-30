@@ -184,7 +184,7 @@ export default function CategoriesClient() {
                       <div className="flex flex-col items-center justify-center p-6 text-center select-none">
                         <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-[#D5D9C8] bg-white flex items-center justify-center mb-2 shadow-2xs">
                           <span
-                            className={`text-xl sm:text-2xl font-bold uppercase tracking-wider transition-transform duration-300 ${
+                            className={`text-xl sm:text-2xl font-semibold uppercase tracking-wider transition-transform duration-300 ${
                               !isEmpty
                                 ? "text-[#5B6240] group-hover:scale-110"
                                 : "text-stone-400"
@@ -211,7 +211,7 @@ export default function CategoriesClient() {
                   <div className="p-4 sm:p-5 flex flex-col flex-1 justify-between bg-white border-t border-stone-100">
                     <div>
                       <h2
-                        className={`text-sm sm:text-base font-bold transition-colors line-clamp-1 ${
+                        className={`text-sm sm:text-base font-semibold transition-colors line-clamp-1 ${
                           !isEmpty
                             ? "text-stone-900 group-hover:text-[#5B6240]"
                             : "text-stone-700"

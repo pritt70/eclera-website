@@ -29,12 +29,7 @@ interface CollectionItem {
 }
 
 export function Footer() {
-  const [policies, setPolicies] = useState<PolicyItem[]>([
-    { title: "Shipping Policy", slug: "shipping-policy" },
-    { title: "Return & Refund Policy", slug: "return-policy" },
-    { title: "Terms & Conditions", slug: "terms-and-conditions" },
-    { title: "Privacy Policy", slug: "privacy-policy" },
-  ]);
+  const [policies, setPolicies] = useState<PolicyItem[]>([]);
 
   const [categories, setCategories] = useState<CategoryItem[]>([
     { name: "Serums & Face Oils", slug: "serums-oils" },
@@ -66,11 +61,15 @@ export function Footer() {
     // Fetch live policies from Admin module
     api("policies", undefined, "GET")
       .then((res) => {
-        if (res && res.status && Array.isArray(res.data) && res.data.length > 0) {
+        if (res && res.status && Array.isArray(res.data)) {
           setPolicies(res.data);
+        } else {
+          setPolicies([]);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setPolicies([]);
+      });
 
     // Fetch live categories from Admin module
     api("categories", undefined, "GET")
@@ -104,7 +103,7 @@ export function Footer() {
     <footer className="bg-[#FAF9F5] text-stone-800 border-t border-stone-200/80">
       {/* Main Footer Content */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-8">
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${policies.length > 0 ? "lg:grid-cols-5" : "lg:grid-cols-4"} gap-8 lg:gap-8`}>
           {/* Column 1: Brand Info & Social Media */}
           <div className="space-y-4">
             <Link href="/" className="inline-block">
@@ -167,7 +166,7 @@ export function Footer() {
 
           {/* Column 2: QUICK LINKS */}
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-stone-900 tracking-[0.2em] uppercase">
+            <h4 className="text-xs font-semibold text-stone-900 tracking-[0.18em] uppercase">
               QUICK LINKS
             </h4>
             <ul className="space-y-2 text-xs">
@@ -186,7 +185,7 @@ export function Footer() {
 
           {/* Column 3: CATEGORIES */}
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-stone-900 tracking-[0.2em] uppercase">
+            <h4 className="text-xs font-semibold text-stone-900 tracking-[0.18em] uppercase">
               CATEGORIES
             </h4>
             <ul className="space-y-2 text-xs">
@@ -205,7 +204,7 @@ export function Footer() {
 
           {/* Column 4: COLLECTIONS */}
           <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-stone-900 tracking-[0.2em] uppercase">
+            <h4 className="text-xs font-semibold text-stone-900 tracking-[0.18em] uppercase">
               COLLECTIONS
             </h4>
             <ul className="space-y-2 text-xs">
@@ -222,24 +221,26 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Column 5: OUR POLICIES */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-stone-900 tracking-[0.2em] uppercase">
-              OUR POLICIES
-            </h4>
-            <ul className="space-y-2 text-xs">
-              {policies.map((p) => (
-                <li key={p._id || p.slug}>
-                  <Link
-                    href={`/policies/${p.slug}`}
-                    className="text-stone-600 hover:text-[#5B6240] transition-colors"
-                  >
-                    {p.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Column 5: OUR POLICIES (Only shown if policies are added from admin panel) */}
+          {policies.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold text-stone-900 tracking-[0.18em] uppercase">
+                OUR POLICIES
+              </h4>
+              <ul className="space-y-2 text-xs">
+                {policies.map((p) => (
+                  <li key={p._id || p.slug}>
+                    <Link
+                      href={`/policies/${p.slug}`}
+                      className="text-stone-600 hover:text-[#5B6240] transition-colors"
+                    >
+                      {p.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 

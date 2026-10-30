@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import ReviewNotificationToast from "@/components/ReviewNotificationToast";
 import { PromoPopup } from "@/components/PromoPopup";
+import { MaintenanceGuard } from "@/components/MaintenanceGuard";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -28,13 +29,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} h-full antialiased`}>
       <body className={`${poppins.className} min-h-full flex flex-col bg-[#FAF7F5] text-stone-900`}>
-        <Suspense fallback={<div className="h-20 bg-white" />}>
-          <Header />
-        </Suspense>
-        <main className="flex-1 min-h-[50vh]">{children}</main>
-        <Footer />
-        <ReviewNotificationToast />
-        <PromoPopup />
+        <MaintenanceGuard>
+          <Suspense fallback={<div className="h-20 bg-white" />}>
+            <Header />
+          </Suspense>
+          <main className="flex-1 min-h-[50vh]">{children}</main>
+          <Footer />
+          <ReviewNotificationToast />
+          <PromoPopup />
+        </MaintenanceGuard>
       </body>
     </html>
   );

@@ -515,13 +515,13 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
   if (!product) {
     return (
       <div className="w-full bg-[#FAF7F5] min-h-[60vh] flex flex-col items-center justify-center py-16 px-4">
-        <h1 className="text-2xl font-bold text-stone-900 mb-2">Product Not Found</h1>
+        <h1 className="text-2xl font-semibold text-stone-900 mb-2">Product Not Found</h1>
         <p className="text-sm text-stone-500 mb-6">
           The product you are looking for does not exist or has been removed.
         </p>
         <Link
           href="/categories"
-          className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider transition-colors"
+          className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold uppercase tracking-wider transition-colors"
         >
           Browse All Categories
         </Link>
@@ -589,7 +589,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
               {/* Discount Percentage Badge on Image */}
               {hasDiscount && (
-                <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-extrabold px-3 py-1.5 uppercase tracking-wider shadow-sm">
+                <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-semibold px-3 py-1.5 uppercase tracking-wider shadow-sm">
                   {discountPercent}% OFF
                 </div>
               )}
@@ -650,7 +650,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
             {/* Product Title */}
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight leading-snug">
+              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight leading-snug">
                 {product.name}
               </h1>
 
@@ -669,7 +669,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                         />
                       ))}
                     </div>
-                    <span className="text-xs font-bold text-stone-900">
+                    <span className="text-xs font-semibold text-stone-900">
                       {reviewStats.averageRating}
                     </span>
                     <span className="text-xs text-stone-400">|</span>
@@ -711,20 +711,20 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
             <div className="pt-2 pb-5 border-b border-stone-200">
               <div className="flex items-center flex-wrap gap-2.5 sm:gap-3.5">
                 {/* Large Prominent Current Price */}
-                <span className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight leading-none inline-flex items-center">
+                <span className="text-3xl sm:text-4xl font-bold text-stone-900 tracking-tight leading-none inline-flex items-center">
                   ₹{price.toLocaleString("en-IN")}
                 </span>
 
                 {/* Strikethrough MRP - Larger font size */}
                 {hasDiscount && (
-                  <span className="text-lg sm:text-xl text-stone-400 line-through font-bold leading-none inline-flex items-center">
+                  <span className="text-lg sm:text-xl text-stone-400 line-through font-medium leading-none inline-flex items-center">
                     ₹{comparePrice.toLocaleString("en-IN")}
                   </span>
                 )}
 
                 {/* Savings Badge - perfectly centered with fixed height */}
                 {hasDiscount && (
-                  <span className="inline-flex items-center justify-center bg-red-600 text-white text-[11px] sm:text-xs font-bold px-2.5 h-[26px] tracking-wider uppercase leading-none shadow-2xs">
+                  <span className="inline-flex items-center justify-center bg-red-600 text-white text-[11px] sm:text-xs font-semibold px-2.5 h-[26px] tracking-wider uppercase leading-none shadow-2xs">
                     Save ₹{savings.toLocaleString("en-IN")} ({discountPercent}% OFF)
                   </span>
                 )}
@@ -739,7 +739,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 shrink-0 ${stockInfo.dotColor}`} />
-                  <span className={`text-xs sm:text-sm font-bold tracking-tight ${stockInfo.textColor}`}>
+                  <span className={`text-xs sm:text-sm font-semibold tracking-tight ${stockInfo.textColor}`}>
                     {stockInfo.label}
                   </span>
                 </div>
@@ -778,7 +778,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   >
                     <FiMinus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="w-12 text-center text-sm font-bold text-stone-900 select-none">
+                  <span className="w-12 text-center text-sm font-semibold text-stone-900 select-none">
                     {quantity}
                   </span>
                   <button
@@ -792,12 +792,12 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   </button>
                 </div>
 
-                {/* Add to Bag Button */}
+                {/* Add to Cart Button */}
                 <button
                   type="button"
                   onClick={handleAddToCart}
                   disabled={(product.stock ?? 0) <= 0}
-                  className={`flex-1 h-11 px-6 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${(product.stock ?? 0) <= 0
+                  className={`flex-1 h-11 px-6 text-xs sm:text-sm font-semibold tracking-wider flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${(product.stock ?? 0) <= 0
                     ? "bg-stone-300 text-stone-500"
                     : addedFeedback
                       ? "bg-emerald-600 text-white shadow-sm"
@@ -807,14 +807,14 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   {addedFeedback ? (
                     <>
                       <FiCheck className="w-4 h-4" />
-                      <span>Added to Bag ✓ ({quantity})</span>
+                      <span>Added to Cart ✓ ({quantity})</span>
                     </>
                   ) : (product.stock ?? 0) <= 0 ? (
                     <span>Sold Out</span>
                   ) : (
                     <>
                       <FiShoppingBag className="w-4 h-4" />
-                      <span>Add to Bag</span>
+                      <span>Add to Cart</span>
                     </>
                   )}
                 </button>
@@ -823,9 +823,9 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               {/* Added confirmation feedback banner */}
               {addedFeedback && (
                 <div className="p-2.5 bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold flex items-center justify-between">
-                  <span>Cart updated! Added {quantity} item(s) to your bag.</span>
-                  <Link href="/cart" className="underline font-bold text-emerald-900">
-                    View Bag →
+                  <span>Cart updated! Added {quantity} item(s) to your cart.</span>
+                  <Link href="/cart" className="underline font-semibold text-emerald-900">
+                    View Cart →
                   </Link>
                 </div>
               )}
@@ -887,7 +887,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
             aria-expanded={openAccordions.description}
           >
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
+              <h2 className="text-base sm:text-lg font-semibold text-stone-900 tracking-tight">
                 Product Description & Details
               </h2>
               <p className="text-[11px] text-stone-500 mt-0.5">
@@ -929,7 +929,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               aria-expanded={openAccordions.specifications}
             >
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
+                <h2 className="text-base sm:text-lg font-semibold text-stone-900 tracking-tight">
                   Product Specifications
                 </h2>
                 <p className="text-[11px] text-stone-500 mt-0.5">
@@ -963,7 +963,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                       >
                         {/* Specification Group Title Header (Left side on desktop, top on mobile) */}
                         <div className="md:col-span-4 lg:col-span-3 p-4 sm:p-5 bg-[#FAF7F5] md:border-r border-b md:border-b-0 border-stone-200 flex items-center">
-                          <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-stone-900">
+                          <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-stone-900">
                             {title}
                           </span>
                         </div>
@@ -1009,7 +1009,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
             aria-expanded={openAccordions.reviews}
           >
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
+              <h2 className="text-base sm:text-lg font-semibold text-stone-900 tracking-tight">
                 Customer Experience
               </h2>
               <p className="text-[11px] text-stone-500 mt-0.5">
@@ -1022,7 +1022,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
             {/* ONLY highlighted average review snippet on Customer Experience + up/down arrow */}
             <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 ml-4">
               {reviewStats.totalReviews > 0 ? (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FAF3DD] border border-[#DECD87] text-stone-900 text-xs font-bold shadow-2xs">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FAF3DD] border border-[#DECD87] text-stone-900 text-xs font-semibold shadow-2xs">
                   <FiStar className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                   <span>
                     {reviewStats.averageRating} / 5.0
@@ -1048,10 +1048,10 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               {/* Write Review Action Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-stone-200 pb-6 mb-8">
                 <div>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#5B6240]">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5B6240]">
                     Verified Feedback
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight mt-0.5">
+                  <h3 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight mt-0.5">
                     Ratings & Feedback
                   </h3>
                 </div>
@@ -1063,7 +1063,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                     setReviewErrorMessage("");
                     setReviewSuccessMessage("");
                   }}
-                  className="px-5 py-2.5 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer"
+                  className="px-5 py-2.5 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer"
                 >
                   <FiMessageSquare className="w-4 h-4" />
                   <span>{showReviewForm ? "Close Review Form" : "Write Customer Review"}</span>
@@ -1073,7 +1073,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               {/* Interactive Review Form */}
               {showReviewForm && (
                 <div className="bg-[#FAF9EB] border border-[#D5D9C8] p-6 sm:p-8 mb-10 transition-all duration-300">
-                  <h4 className="text-base sm:text-lg font-bold text-stone-900 mb-1">
+                  <h4 className="text-base sm:text-lg font-semibold text-stone-900 mb-1">
                     Share Your Customer Experience
                   </h4>
                   <p className="text-xs text-stone-500 mb-6">
@@ -1095,7 +1095,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                   <form onSubmit={handleSubmitReview} className="space-y-4 max-w-2xl">
                     {/* Rating selection with clickable stars */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">
                         Your Rating:
                       </label>
                       <div className="flex items-center gap-1.5">
@@ -1116,7 +1116,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                             />
                           </button>
                         ))}
-                        <span className="ml-2 text-xs font-bold text-stone-700">
+                        <span className="ml-2 text-xs font-semibold text-stone-700">
                           {formRating} of 5 Stars
                         </span>
                       </div>
@@ -1125,7 +1125,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                     {/* Customer Name & Country Fields (strictly blank if not logged in) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">
                           Your Full Name *
                         </label>
                         <input
@@ -1139,7 +1139,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">
                           Your Country *
                         </label>
                         <input
@@ -1155,7 +1155,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
 
                     {/* Review Message */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5">
                         Your Experience & Feedback *
                       </label>
                       <textarea
@@ -1172,7 +1172,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                     <button
                       type="submit"
                       disabled={submittingReview}
-                      className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer"
+                      className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {submittingReview ? "Submitting Review..." : "Submit Experience"}
                     </button>
@@ -1185,7 +1185,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-[#FAF7F5] border border-stone-200 p-6 mb-8">
                   {/* Overall Score */}
                   <div className="md:col-span-4 flex flex-col items-center justify-center text-center border-b md:border-b-0 md:border-r border-stone-200 pb-6 md:pb-0 md:pr-6">
-                    <span className="text-4xl sm:text-5xl font-black text-stone-900 tracking-tight">
+                    <span className="text-4xl sm:text-5xl font-bold text-stone-900 tracking-tight">
                       {reviewStats.averageRating}
                     </span>
                     <div className="flex items-center text-amber-500 mt-2">
@@ -1249,7 +1249,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                     <div className="w-16 h-16 bg-[#F1F3EC] border border-[#D5D9C8] flex items-center justify-center text-[#5B6240] mb-4">
                       <FiEdit3 className="w-8 h-8" />
                     </div>
-                    <h4 className="text-lg sm:text-xl font-bold text-stone-900 mb-1.5">
+                    <h4 className="text-lg sm:text-xl font-semibold text-stone-900 mb-1.5">
                       No Customer Reviews Yet
                     </h4>
                     <p className="text-xs sm:text-sm text-stone-500 max-w-md mb-6 leading-relaxed">
@@ -1258,7 +1258,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                     <button
                       type="button"
                       onClick={() => setShowReviewForm(true)}
-                      className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer"
+                      className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-colors cursor-pointer"
                     >
                       <FiMessageSquare className="w-4 h-4" />
                       <span>Write The First Review</span>
@@ -1273,12 +1273,12 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
                       {/* Review Top: Customer Name, Country, Verified, Date */}
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 bg-[#5B6240] text-white flex items-center justify-center text-xs font-bold uppercase">
+                          <div className="w-7 h-7 bg-[#5B6240] text-white flex items-center justify-center text-xs font-semibold uppercase">
                             {rev.name ? rev.name[0] : "C"}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs sm:text-sm font-bold text-stone-900">
+                              <span className="text-xs sm:text-sm font-semibold text-stone-900">
                                 {rev.name}
                               </span>
                               {rev.country && (
@@ -1333,7 +1333,7 @@ export default function ProductDetailClient({ slug }: { slug: string }) {
               <span className="text-xs uppercase tracking-[0.2em] text-[#5B6240] font-semibold block mb-1">
                 Curated For You
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
                 You Might Also Like
               </h2>
             </div>

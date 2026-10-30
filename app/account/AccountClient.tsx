@@ -242,7 +242,7 @@ export default function AccountClient() {
             <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto text-[#5B6240]">
               <FiUser className="w-6 h-6" />
             </div>
-            <h2 className="text-base font-bold text-stone-900 uppercase tracking-wider">
+            <h2 className="text-base font-semibold text-stone-900 uppercase tracking-wider">
               Sign In to Your Account
             </h2>
             <p className="text-xs text-stone-600">
@@ -255,7 +255,7 @@ export default function AccountClient() {
                   new CustomEvent("eclera_open_auth_modal", { detail: { mode: "login" } })
                 );
               }}
-              className="w-full py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
+              className="w-full py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
             >
               Sign In / Register
             </button>
@@ -275,42 +275,35 @@ export default function AccountClient() {
 
   const availableStates = getStatesForCountry(country);
 
-  // Status Badge Helper - Short Clean Labels
+  // Status Badge Helper - Strict 5 Flow Statuses (Pending -> Confirmed -> Shipped -> Delivered -> Returned)
   const getStatusBadge = (status: string) => {
     const s = String(status || "pending").toLowerCase();
     switch (s) {
       case "confirmed":
-      case "paid":
-      case "success":
         return {
-          bg: "bg-emerald-50 text-emerald-700 border-emerald-200",
-          label: "SUCCESS",
-        };
-      case "delivered":
-        return {
-          bg: "bg-teal-50 text-teal-700 border-teal-200",
-          label: "DELIVERED",
+          bg: "bg-sky-50 text-sky-700 border-sky-200",
+          label: "Confirmed",
         };
       case "shipped":
         return {
           bg: "bg-purple-50 text-purple-700 border-purple-200",
-          label: "SHIPPED",
+          label: "Shipped",
         };
-      case "processing":
+      case "delivered":
         return {
-          bg: "bg-indigo-50 text-indigo-700 border-indigo-200",
-          label: "PROCESSING",
+          bg: "bg-emerald-50 text-emerald-700 border-emerald-200",
+          label: "Delivered",
         };
-      case "cancelled":
+      case "returned":
         return {
-          bg: "bg-red-50 text-red-700 border-red-200",
-          label: "CANCELLED",
+          bg: "bg-rose-50 text-rose-700 border-rose-200",
+          label: "Returned",
         };
       case "pending":
       default:
         return {
           bg: "bg-amber-50 text-amber-700 border-amber-200",
-          label: "PENDING",
+          label: "Pending",
         };
     }
   };
@@ -411,7 +404,7 @@ export default function AccountClient() {
                 <div className="flex items-center gap-2">
                   {orders.length > 0 && (
                     <span
-                      className={`w-5 h-5 min-w-[20px] rounded-full flex items-center justify-center text-[10px] font-bold leading-none aspect-square shrink-0 ${
+                      className={`w-5 h-5 min-w-[20px] rounded-full flex items-center justify-center text-[10px] font-semibold leading-none aspect-square shrink-0 ${
                         activeTab === "orders"
                           ? "bg-white/25 text-white"
                           : "bg-stone-200 text-stone-700"
@@ -464,7 +457,7 @@ export default function AccountClient() {
             {activeTab === "personal" && (
               <form onSubmit={handleSave} className="space-y-6">
                 <div className="border-b border-stone-200 pb-3">
-                  <h2 className="text-base font-bold text-stone-900 uppercase tracking-wider">
+                  <h2 className="text-base font-semibold text-stone-900 uppercase tracking-wider">
                     Personal Details
                   </h2>
                   <p className="text-xs text-stone-500 mt-0.5">
@@ -473,7 +466,7 @@ export default function AccountClient() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                  <label className="text-xs font-semibold text-stone-700 uppercase tracking-wide">
                     Full Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -488,7 +481,7 @@ export default function AccountClient() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide flex items-center justify-between">
+                    <label className="text-xs font-semibold text-stone-700 uppercase tracking-wide flex items-center justify-between">
                       <span>Mobile Number</span>
                       {customer.phone && (
                         <span className="text-[10px] text-stone-400 font-normal flex items-center gap-1">
@@ -507,7 +500,7 @@ export default function AccountClient() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide flex items-center justify-between">
+                    <label className="text-xs font-semibold text-stone-700 uppercase tracking-wide flex items-center justify-between">
                       <span>Email Address</span>
                       {customer.email && (
                         <span className="text-[10px] text-stone-400 font-normal flex items-center gap-1">
@@ -530,7 +523,7 @@ export default function AccountClient() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-8 py-3 bg-[#5B6240] hover:bg-[#474D32] disabled:bg-stone-300 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
+                    className="px-8 py-3 bg-[#5B6240] hover:bg-[#474D32] disabled:bg-stone-300 text-white text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
                   >
                     {saving ? "Updating..." : "Save Changes"}
                   </button>
@@ -544,7 +537,7 @@ export default function AccountClient() {
             {activeTab === "address" && (
               <form onSubmit={handleSave} className="space-y-6">
                 <div className="border-b border-stone-200 pb-3">
-                  <h2 className="text-base font-bold text-stone-900 uppercase tracking-wider">
+                  <h2 className="text-base font-semibold text-stone-900 uppercase tracking-wider">
                     Delivery Address
                   </h2>
                   <p className="text-xs text-stone-500 mt-0.5">
@@ -555,7 +548,7 @@ export default function AccountClient() {
                 {/* Country and State Selection */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide flex items-center gap-1.5">
+                    <label className="text-xs font-semibold text-stone-700 uppercase tracking-wide flex items-center gap-1.5">
                       <FiGlobe className="w-3.5 h-3.5 text-[#5B6240]" />
                       <span>Country</span> <span className="text-red-500">*</span>
                     </label>
@@ -574,7 +567,7 @@ export default function AccountClient() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 uppercase tracking-wide">
                       State / Province <span className="text-red-500">*</span>
                     </label>
                     {availableStates.length > 0 ? (
@@ -605,7 +598,7 @@ export default function AccountClient() {
 
                 {/* Street Address */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                  <label className="text-xs font-semibold text-stone-700 uppercase tracking-wide">
                     Street Address / Flat / Landmark <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -621,7 +614,7 @@ export default function AccountClient() {
                 {/* City and Postal Code */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 uppercase tracking-wide">
                       City <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -635,7 +628,7 @@ export default function AccountClient() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 uppercase tracking-wide">
                       Postal Code / PIN <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -654,7 +647,7 @@ export default function AccountClient() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-8 py-3 bg-[#5B6240] hover:bg-[#474D32] disabled:bg-stone-300 text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
+                    className="px-8 py-3 bg-[#5B6240] hover:bg-[#474D32] disabled:bg-stone-300 text-white text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
                   >
                     {saving ? "Saving Address..." : "Save Delivery Address"}
                   </button>
@@ -669,7 +662,7 @@ export default function AccountClient() {
               <div className="space-y-6">
                 <div className="border-b border-stone-200 pb-3 flex items-center justify-between">
                   <div>
-                    <h2 className="text-base font-bold text-stone-900 uppercase tracking-wider">
+                    <h2 className="text-base font-semibold text-stone-900 uppercase tracking-wider">
                       My Orders
                     </h2>
                     <p className="text-xs text-stone-500 mt-0.5">
@@ -677,7 +670,7 @@ export default function AccountClient() {
                     </p>
                   </div>
                   {orders.length > 0 && (
-                    <span className="text-xs font-bold text-[#5B6240] uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-[#5B6240] uppercase tracking-wider">
                       {orders.length} {orders.length === 1 ? "Order" : "Orders"}
                     </span>
                   )}
@@ -695,7 +688,7 @@ export default function AccountClient() {
                       <FiPackage className="w-7 h-7" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-stone-900 uppercase tracking-wider">
+                      <h3 className="text-sm font-semibold text-stone-900 uppercase tracking-wider">
                         No Orders Yet
                       </h3>
                       <p className="text-xs text-stone-500 mt-1 max-w-sm mx-auto">
@@ -704,7 +697,7 @@ export default function AccountClient() {
                     </div>
                     <Link
                       href="/shop"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-xs"
                     >
                       <FiShoppingBag className="w-4 h-4" />
                       <span>Explore Products</span>
@@ -734,17 +727,17 @@ export default function AccountClient() {
                           <div className="p-4 sm:p-5 bg-stone-50 border-b border-stone-200 flex flex-wrap items-center justify-between gap-3">
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-stone-900">
+                                <span className="text-xs font-semibold text-stone-900">
                                   #{ord.orderNumber}
                                 </span>
                                 <span
-                                  className={`px-2.5 py-0.5 border text-[10px] font-bold uppercase tracking-wider ${badge.bg}`}
+                                  className={`px-2.5 py-0.5 border text-[10px] font-semibold uppercase tracking-wider ${badge.bg}`}
                                 >
                                   {badge.label}
                                 </span>
                               </div>
                               <p className="text-[11px] text-stone-500 flex items-center gap-1">
-                                <FiClock className="w-3 h-3 text-stone-400" />
+                                <FiClock className="w-3.5 h-3.5 text-stone-400" />
                                 <span>{formattedDate}</span>
                               </p>
                             </div>
@@ -753,7 +746,7 @@ export default function AccountClient() {
                               <span className="text-[10px] text-stone-500 uppercase tracking-wider block">
                                 Total Paid
                               </span>
-                              <span className="text-sm sm:text-base font-extrabold text-[#5B6240]">
+                              <span className="text-sm sm:text-base font-bold text-[#5B6240]">
                                 ₹{(ord.totalAmount || 0).toLocaleString("en-IN")}
                               </span>
                             </div>
@@ -774,7 +767,10 @@ export default function AccountClient() {
                                         alt={item.productName || item.name || "Product"}
                                       />
                                       <div className="min-w-0">
-                                        <p className="text-xs font-bold text-stone-900 truncate">
+                                        <p
+                                          title={item.productName || item.name}
+                                          className="text-xs font-semibold text-stone-900 truncate"
+                                        >
                                           {item.productName || item.name}
                                         </p>
                                         <p className="text-[11px] text-stone-500 mt-0.5">
@@ -785,7 +781,7 @@ export default function AccountClient() {
                                     </div>
 
                                     <div className="text-right shrink-0">
-                                      <span className="text-xs font-bold text-stone-900">
+                                      <span className="text-xs font-semibold text-stone-900">
                                         ₹
                                         {(
                                           (item.price || 0) * (item.quantity || 1)
@@ -800,7 +796,7 @@ export default function AccountClient() {
                           {/* Order Footer with Address & Payment Method */}
                           <div className="p-4 bg-[#FAF9F5] border-t border-stone-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-stone-600">
                             <div className="space-y-0.5">
-                              <span className="font-bold text-stone-800 text-[11px] uppercase tracking-wider block">
+                              <span className="font-semibold text-stone-800 text-[11px] uppercase tracking-wider block">
                                 Shipping Address:
                               </span>
                               <p className="text-[11px] text-stone-600">

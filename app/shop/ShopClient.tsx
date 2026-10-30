@@ -512,7 +512,7 @@ export default function ShopClient() {
     <div className="flex flex-col h-full">
       {/* Header: "Filters" title (Left) + "Reset Filter" button (Right) */}
       <div className="shrink-0 bg-white border-b border-stone-200 px-5 py-4 flex items-center justify-between shadow-2xs">
-        <h3 className="text-sm font-bold text-stone-900 uppercase tracking-wider">
+        <h3 className="text-sm font-semibold text-stone-900 uppercase tracking-wider">
           Filters
         </h3>
         <button
@@ -534,10 +534,10 @@ export default function ShopClient() {
         {/* 1. Price Range Filter (Dual Thumb Slider) */}
         <div className="space-y-3.5 pb-5 border-b border-stone-200/80">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-800 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-stone-800 uppercase tracking-wider">
               Price Range
             </span>
-            <span className="text-xs font-bold text-stone-900 bg-stone-100 px-2.5 py-0.5 rounded-none">
+            <span className="text-xs font-semibold text-stone-900 bg-stone-100 px-2.5 py-0.5 rounded-none">
               ₹{priceRange[0]} - ₹{priceRange[1]}
             </span>
           </div>
@@ -602,7 +602,7 @@ export default function ShopClient() {
               onClick={() => toggleSection("categories")}
               className="w-full flex items-center justify-between text-left group cursor-pointer"
             >
-              <span className="text-xs font-bold text-stone-800 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-stone-800 uppercase tracking-wider">
                 Categories
               </span>
               <FiChevronDown
@@ -653,7 +653,7 @@ export default function ShopClient() {
               onClick={() => toggleSection("collections")}
               className="w-full flex items-center justify-between text-left group cursor-pointer"
             >
-              <span className="text-xs font-bold text-stone-800 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-stone-800 uppercase tracking-wider">
                 Collections
               </span>
               <FiChevronDown
@@ -706,7 +706,7 @@ export default function ShopClient() {
                 onClick={() => toggleSection(spec.id)}
                 className="w-full flex items-center justify-between text-left group cursor-pointer"
               >
-                <span className="text-xs font-bold text-stone-800 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-stone-800 uppercase tracking-wider">
                   {spec.name}
                 </span>
                 <FiChevronDown
@@ -813,7 +813,7 @@ export default function ShopClient() {
 
                 {/* Left Side: "Products" title + count badge */}
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base sm:text-lg font-bold text-stone-900 tracking-tight">
+                  <h2 className="text-base sm:text-lg font-semibold text-stone-900 tracking-tight">
                     Products
                   </h2>
                   <span className="text-xs text-stone-500 font-medium">
@@ -977,7 +977,7 @@ export default function ShopClient() {
           <div className="relative w-4/5 max-w-sm h-full bg-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
             {/* Top Close Button bar */}
             <div className="px-4 py-3 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
-              <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-stone-700 uppercase tracking-wider">
                 Filter Menu
               </span>
               <button
@@ -1000,7 +1000,7 @@ export default function ShopClient() {
               <button
                 type="button"
                 onClick={() => setMobileFilterOpen(false)}
-                className="w-full py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider rounded-none cursor-pointer shadow-xs"
+                className="w-full py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold uppercase tracking-wider rounded-none cursor-pointer shadow-xs"
               >
                 Show Results ({products.length})
               </button>

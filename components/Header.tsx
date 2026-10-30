@@ -215,7 +215,7 @@ export function Header() {
               <Link
                 href="/"
                 className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-[#5B6240] ${
-                  pathname === "/" ? "text-[#5B6240] font-bold" : "text-stone-700"
+                  pathname === "/" ? "text-[#5B6240]" : "text-stone-700"
                 }`}
               >
                 Home
@@ -224,7 +224,7 @@ export function Header() {
               <Link
                 href="/categories"
                 className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-[#5B6240] ${
-                  pathname.startsWith("/categories") ? "text-[#5B6240] font-bold" : "text-stone-700"
+                  pathname.startsWith("/categories") ? "text-[#5B6240]" : "text-stone-700"
                 }`}
               >
                 Categories
@@ -233,7 +233,7 @@ export function Header() {
               <Link
                 href="/collections"
                 className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-[#5B6240] ${
-                  pathname.startsWith("/collections") ? "text-[#5B6240] font-bold" : "text-stone-700"
+                  pathname.startsWith("/collections") ? "text-[#5B6240]" : "text-stone-700"
                 }`}
               >
                 Collections
@@ -242,7 +242,7 @@ export function Header() {
               <Link
                 href="/shop"
                 className={`text-xs font-semibold tracking-wider uppercase transition-colors hover:text-[#5B6240] ${
-                  pathname.startsWith("/shop") ? "text-[#5B6240] font-bold" : "text-stone-700"
+                  pathname.startsWith("/shop") ? "text-[#5B6240]" : "text-stone-700"
                 }`}
               >
                 Shop
@@ -314,7 +314,7 @@ export function Header() {
               >
                 <FiHeart className="w-5 h-5" />
                 {wishlistCount > 0 && (
-                  <span className="absolute top-1 right-1 h-4 w-4 bg-[#5B6240] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute top-1 right-1 h-4 w-4 bg-[#5B6240] text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
                     {wishlistCount}
                   </span>
                 )}
@@ -328,7 +328,7 @@ export function Header() {
                 aria-label="Cart"
               >
                 <FiShoppingBag className="w-5 h-5" />
-                <span className="absolute top-1 right-1 h-4 w-4 bg-[#5B6240] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute top-1 right-1 h-4 w-4 bg-[#5B6240] text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
                   {cartCount}
                 </span>
               </Link>
@@ -385,7 +385,7 @@ export function Header() {
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-3 rounded text-xs font-bold tracking-wider uppercase transition-all ${
+              className={`block px-4 py-3 rounded text-xs font-semibold tracking-wider uppercase transition-all ${
                 pathname === "/"
                   ? "bg-[#5B6240] text-white shadow-xs"
                   : "text-stone-800 hover:bg-stone-50 hover:text-[#5B6240]"
@@ -397,7 +397,7 @@ export function Header() {
             <Link
               href="/categories"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-3 rounded text-xs font-bold tracking-wider uppercase transition-all ${
+              className={`block px-4 py-3 rounded text-xs font-semibold tracking-wider uppercase transition-all ${
                 pathname.startsWith("/categories")
                   ? "bg-[#5B6240] text-white shadow-xs"
                   : "text-stone-800 hover:bg-stone-50 hover:text-[#5B6240]"
@@ -409,7 +409,7 @@ export function Header() {
             <Link
               href="/collections"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-3 rounded text-xs font-bold tracking-wider uppercase transition-all ${
+              className={`block px-4 py-3 rounded text-xs font-semibold tracking-wider uppercase transition-all ${
                 pathname.startsWith("/collections")
                   ? "bg-[#5B6240] text-white shadow-xs"
                   : "text-stone-800 hover:bg-stone-50 hover:text-[#5B6240]"
@@ -421,7 +421,7 @@ export function Header() {
             <Link
               href="/shop"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-3 rounded text-xs font-bold tracking-wider uppercase transition-all ${
+              className={`block px-4 py-3 rounded text-xs font-semibold tracking-wider uppercase transition-all ${
                 pathname.startsWith("/shop")
                   ? "bg-[#5B6240] text-white shadow-xs"
                   : "text-stone-800 hover:bg-stone-50 hover:text-[#5B6240]"

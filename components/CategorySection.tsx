@@ -182,7 +182,7 @@ export function CategorySection() {
                         />
                       ) : (
                         <span
-                          className={`text-xl sm:text-2xl font-bold uppercase tracking-wider transition-transform duration-300 ${
+                          className={`text-xl sm:text-2xl font-semibold uppercase tracking-wider transition-transform duration-300 ${
                             !isEmpty
                               ? "text-[#5B6240]/80 group-hover:scale-110"
                               : "text-stone-400"
@@ -195,7 +195,7 @@ export function CategorySection() {
                       {/* Soon badge overlay inside circular image for empty categories */}
                       {isEmpty && (
                         <div className="absolute inset-x-0 bottom-0 py-1 bg-stone-900/75 backdrop-blur-2xs flex items-center justify-center">
-                          <span className="text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-wider">
+                          <span className="text-[9px] sm:text-[10px] font-semibold text-white uppercase tracking-wider">
                             Soon
                           </span>
                         </div>

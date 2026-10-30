@@ -21,7 +21,17 @@ import {
   FiChevronRight,
   FiShield,
   FiImage,
+  FiLock,
+  FiExternalLink,
+  FiStar,
+  FiTruck,
 } from "react-icons/fi";
+import {
+  RiWhatsappLine,
+  RiSparklingLine,
+  RiLeafLine,
+  RiShieldCheckLine,
+} from "react-icons/ri";
 import { api } from "@/helper";
 import { COUNTRIES, getStatesForCountry } from "@/helper/countries";
 
@@ -115,15 +125,146 @@ export default function CartClient() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   // Payment QR & Proof Upload State
-  const [paymentScreenshot, setPaymentScreenshot] = useState<string>("");
+  const [selectedProof, setSelectedProof] = useState<{ base64: string; fileName: string } | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string>("");
   const [utrNumber, setUtrNumber] = useState<string>("");
-  const [uploadingProof, setUploadingProof] = useState<boolean>(false);
   const [submittingOrder, setSubmittingOrder] = useState<boolean>(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [screenshotError, setScreenshotError] = useState<string | null>(null);
+
+  // Empty Cart Recommendations & Categories
+  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
+  const [categoriesList, setCategoriesList] = useState<any[]>([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState<boolean>(false);
+
+  // Load recommendations and categories when cart is empty
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      setLoadingRecommendations(true);
+      api("products", undefined, "GET")
+        .then((res) => {
+          if (res?.status && Array.isArray(res.data)) {
+            setRecommendedProducts(res.data.slice(0, 4));
+          }
+        })
+        .catch(() => null)
+        .finally(() => setLoadingRecommendations(false));
+
+      api("categories", undefined, "GET")
+        .then((res) => {
+          if (res?.status && Array.isArray(res.data)) {
+            setCategoriesList(res.data.slice(0, 6));
+          }
+        })
+        .catch(() => null);
+    }
+  }, [cartItems.length]);
 
   // Placed Order Details
   const [placedOrder, setPlacedOrder] = useState<any | null>(null);
+
+  // 1.0 Live Order Status Polling from Database (Auto-refreshes when Admin updates status)
+  useEffect(() => {
+    if (step !== 4 || !placedOrder?.orderNumber) return;
+
+    let isMounted = true;
+    const fetchLatestStatus = async () => {
+      try {
+        const res = await api(`order/status/${placedOrder.orderNumber}`, undefined, "GET");
+        if (isMounted && res?.status && res?.data) {
+          setPlacedOrder((prev: any) => ({
+            ...prev,
+            ...res.data,
+          }));
+        }
+      } catch (e) {
+        // Silent catch for background polling
+      }
+    };
+
+    fetchLatestStatus();
+    const interval = setInterval(fetchLatestStatus, 5000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [step, placedOrder?.orderNumber]);
+
+  const getOrderStatusBadge = (st?: string) => {
+    const s = (st || "pending").toLowerCase();
+    switch (s) {
+      case "delivered":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wide">
+            Delivered
+          </span>
+        );
+      case "shipped":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200 uppercase tracking-wide">
+            Shipped
+          </span>
+        );
+      case "confirmed":
+      case "success":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200 uppercase tracking-wide">
+            Confirmed
+          </span>
+        );
+      case "returned":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wide">
+            Returned
+          </span>
+        );
+      case "cancelled":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-stone-100 text-stone-700 border border-stone-200 uppercase tracking-wide">
+            Cancelled
+          </span>
+        );
+      case "pending":
+      default:
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-wide">
+            Pending
+          </span>
+        );
+    }
+  };
+
+  const getPaymentStatusBadge = (st?: string) => {
+    const s = (st || "pending").toLowerCase();
+    switch (s) {
+      case "paid":
+      case "completed":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wide">
+            Paid
+          </span>
+        );
+      case "failed":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wide">
+            Failed
+          </span>
+        );
+      case "refunded":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200 uppercase tracking-wide">
+            Refunded
+          </span>
+        );
+      case "pending":
+      default:
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-[2px] text-[10px] sm:text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-wide">
+            Pending
+          </span>
+        );
+    }
+  };
 
   // 1. Load Cart from localStorage or URL Abandoned Cart
   useEffect(() => {
@@ -259,6 +400,32 @@ export default function CartClient() {
     }
   };
 
+  // Quick add to cart from empty cart suggestions
+  const handleQuickAdd = (product: any) => {
+    const existingIndex = cartItems.findIndex((it) => it._id === product._id);
+    let updated: CartItem[];
+    if (existingIndex > -1) {
+      updated = [...cartItems];
+      updated[existingIndex].quantity += 1;
+    } else {
+      updated = [
+        ...cartItems,
+        {
+          _id: product._id,
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          comparePrice: product.comparePrice,
+          image: product.images?.[0]?.url || product.images?.[0]?.publicUrl || product.image || "",
+          quantity: 1,
+        },
+      ];
+    }
+    updateCartItemsState(updated);
+    setStep(1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   // Calculations
   const subtotal = useMemo(() => {
     return cartItems.reduce((acc, it) => acc + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
@@ -342,7 +509,13 @@ export default function CartClient() {
     }
 
     if (subtotal <= 0) {
-      setCouponError("Add items to your bag first to apply coupons.");
+      setCouponError("Add items to your cart first to apply coupons.");
+      return;
+    }
+
+    // Single coupon check: If the same coupon is already applied
+    if (appliedCoupon && appliedCoupon.code === code) {
+      setCouponError(`Coupon "${code}" is already applied.`);
       return;
     }
 
@@ -353,8 +526,14 @@ export default function CartClient() {
     try {
       const res = await api("order/validate-coupon", { code, subtotal }, "POST");
       if (res && res.status && res.data) {
+        // Enforce single coupon: replaces any previous coupon
+        const isReplacing = !!appliedCoupon;
         setAppliedCoupon(res.data);
-        setCouponSuccess(res.message || `Coupon "${code}" applied successfully!`);
+        if (isReplacing) {
+          setCouponSuccess(`Coupon updated to "${code}"! (Only 1 coupon applied per order)`);
+        } else {
+          setCouponSuccess(res.message || `Coupon "${code}" applied successfully!`);
+        }
         setCouponInput("");
         setCouponModalOpen(false);
       } else {
@@ -446,7 +625,7 @@ export default function CartClient() {
           }).catch(() => null);
         }
       }
-    } catch {}
+    } catch { }
 
     // Sync abandoned cart at payment_pending step
     syncAbandonedCart("payment_pending");
@@ -454,7 +633,7 @@ export default function CartClient() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Handle Payment Screenshot Upload
+  // Handle Payment Screenshot Selection (Client-side preview only, NO immediate API or database call)
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -465,45 +644,57 @@ export default function CartClient() {
     }
 
     setPaymentError(null);
-    setUploadingProof(true);
+    setScreenshotError(null);
 
     const reader = new FileReader();
-    reader.onload = async () => {
+    reader.onload = () => {
       const base64Data = reader.result as string;
       setScreenshotPreview(base64Data);
-
-      try {
-        const uploadRes = await api("upload/payment-proof", {
-          imageBase64: base64Data,
-          fileName: file.name,
-        }, "POST");
-
-        if (uploadRes && uploadRes.status && uploadRes.data?.url) {
-          setPaymentScreenshot(uploadRes.data.url);
-        } else {
-          // Direct base64 fallback
-          setPaymentScreenshot(base64Data);
-        }
-      } catch {
-        setPaymentScreenshot(base64Data);
-      } finally {
-        setUploadingProof(false);
-      }
+      setSelectedProof({
+        base64: base64Data,
+        fileName: file.name,
+      });
     };
     reader.readAsDataURL(file);
   };
 
-  // Place Final Order with Screenshot Proof
+  // Place Final Order: Upload screenshot and save order to database ONLY upon clicking "Order Now"
   const handlePlaceOrder = async () => {
-    if (!paymentScreenshot) {
-      setPaymentError("Please upload your payment screenshot proof before confirming the order.");
+    if (!selectedProof && !screenshotPreview) {
+      setScreenshotError("Please upload your payment screenshot to proceed with your order.");
+      const el = document.getElementById("payment-screenshot-upload-box");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
 
     setSubmittingOrder(true);
     setPaymentError(null);
+    setScreenshotError(null);
 
     try {
+      // 1. Upload screenshot to storage/API only now
+      let finalScreenshotUrl = "";
+      if (selectedProof) {
+        try {
+          const uploadRes = await api("upload/payment-proof", {
+            imageBase64: selectedProof.base64,
+            fileName: selectedProof.fileName,
+          }, "POST");
+
+          if (uploadRes && uploadRes.status && uploadRes.data?.url) {
+            finalScreenshotUrl = uploadRes.data.url;
+          } else {
+            finalScreenshotUrl = selectedProof.base64;
+          }
+        } catch {
+          finalScreenshotUrl = selectedProof.base64;
+        }
+      } else if (screenshotPreview) {
+        finalScreenshotUrl = screenshotPreview;
+      }
+
       let customerId = undefined;
       try {
         const saved = localStorage.getItem("eclera_customer");
@@ -511,7 +702,7 @@ export default function CartClient() {
           const parsed = JSON.parse(saved);
           customerId = parsed._id || parsed.id;
         }
-      } catch {}
+      } catch { }
 
       const orderPayload = {
         customer: {
@@ -535,12 +726,13 @@ export default function CartClient() {
         couponCode: appliedCoupon?.code || "",
         shippingFee,
         totalAmount,
-        paymentScreenshot,
+        paymentScreenshot: finalScreenshotUrl,
         utrNumber: utrNumber.trim(),
         cartNumber,
         notes: `QR Payment proof attached. Customer UTR: ${utrNumber || "N/A"}`,
       };
 
+      // 2. Save order to database
       const res = await api("order/create", orderPayload, "POST");
 
       if (res && res.status && res.data) {
@@ -583,72 +775,214 @@ export default function CartClient() {
   // STEP 4: ORDER CONFIRMED / SUCCESS SCREEN
   // ----------------------------------------------------
   if (step === 4 && placedOrder) {
+    const proofUrl =
+      placedOrder.paymentScreenshot ||
+      placedOrder.paymentProofUrl ||
+      screenshotPreview ||
+      "";
+
+    const handleOpenPaymentProof = (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (!proofUrl) return;
+
+      if (proofUrl.startsWith("data:")) {
+        const win = window.open("", "_blank");
+        if (win) {
+          win.document.write(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Payment Proof Screenshot - ${placedOrder.orderNumber}</title>
+              <style>
+                * { box-sizing: border-box; }
+                body {
+                  margin: 0;
+                  background-color: #0b0f19;
+                  color: #f1f5f9;
+                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                  min-height: 100vh;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 16px;
+                }
+                .bar {
+                  margin-bottom: 14px;
+                  text-align: center;
+                }
+                .bar h2 {
+                  margin: 0 0 4px 0;
+                  font-size: 15px;
+                  font-weight: 600;
+                  letter-spacing: 0.05em;
+                }
+                .bar p {
+                  margin: 0;
+                  font-size: 12px;
+                  color: #94a3b8;
+                }
+                .frame {
+                  max-width: 100%;
+                  max-height: 85vh;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  background: #1e293b;
+                  padding: 8px;
+                  border-radius: 8px;
+                  border: 1px solid #334155;
+                  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+                }
+                img {
+                  max-width: 100%;
+                  max-height: 82vh;
+                  object-fit: contain;
+                  border-radius: 4px;
+                  display: block;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="bar">
+                <h2>Payment Proof Screenshot</h2>
+                <p>Order: ${placedOrder.orderNumber}</p>
+              </div>
+              <div class="frame">
+                <img src="${proofUrl}" alt="Payment Proof Screenshot - ${placedOrder.orderNumber}" />
+              </div>
+            </body>
+            </html>
+          `);
+          win.document.close();
+        }
+      } else {
+        window.open(proofUrl, "_blank", "noopener,noreferrer");
+      }
+    };
+
     return (
-      <div className="w-full bg-[#FAF7F5] min-h-screen pb-20 pt-8 sm:pt-12">
-        <div className="max-w-[760px] mx-auto px-4 sm:px-6">
-          <div className="bg-white border border-stone-200 shadow-sm p-6 sm:p-10 text-center">
+      <div className="w-full bg-[#FAF7F5] min-h-screen pb-16 sm:pb-20 pt-6 sm:pt-12">
+        <div className="max-w-[760px] mx-auto px-3 sm:px-6">
+          <div className="bg-white border border-stone-200 shadow-sm p-4 sm:p-8 md:p-10 text-center">
             {/* Success Icon */}
-            <div className="w-16 h-16 bg-[#5B6240]/10 text-[#5B6240] rounded-full flex items-center justify-center mx-auto mb-5">
-              <FiCheckCircle className="w-9 h-9" />
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#5B6240]/10 text-[#5B6240] rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5">
+              <FiCheckCircle className="w-7 h-7 sm:w-9 sm:h-9" />
             </div>
 
-            <span className="text-[11px] font-bold tracking-widest text-[#5B6240] uppercase">
-              Order Request Submitted
+            <span className="text-[10px] sm:text-[11px] font-semibold tracking-widest text-[#5B6240] uppercase">
+              {placedOrder.orderStatus === "delivered"
+                ? "Order Delivered"
+                : placedOrder.orderStatus === "shipped"
+                ? "Order Shipped"
+                : placedOrder.orderStatus === "confirmed"
+                ? "Order Confirmed"
+                : "Order Request Submitted"}
             </span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 mt-1 mb-2 tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-900 mt-1 mb-2 tracking-tight">
               Thank You For Your Order!
             </h1>
-            <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto leading-relaxed">
-              We have received your order request along with your payment screenshot proof. Our admin team will verify the payment and confirm your order shortly.
+            <p className="text-xs sm:text-sm text-stone-600 max-w-lg mx-auto leading-relaxed px-1">
+              {placedOrder.orderStatus === "delivered"
+                ? "Your order has been successfully delivered. Thank you for choosing Eclera Botanical Skincare!"
+                : placedOrder.orderStatus === "shipped"
+                ? "Great news! Your package has been dispatched and is on its way to your delivery address."
+                : placedOrder.orderStatus === "confirmed"
+                ? "Your payment proof has been verified and your order has been confirmed by our team."
+                : "We have received your order request along with your payment screenshot proof. Our admin team will verify the payment and confirm your order shortly."}
             </p>
 
             {/* Order Details Summary Box */}
-            <div className="mt-8 p-5 bg-[#FAF9F5] border border-stone-200 text-left text-xs space-y-3">
-              <div className="flex justify-between items-center pb-2.5 border-b border-stone-200">
+            <div className="mt-6 sm:mt-8 p-3.5 sm:p-5 bg-[#FAF9F5] border border-stone-200 text-left text-xs sm:text-[13px] space-y-3">
+              <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-1.5 pb-2.5 border-b border-stone-200">
                 <span className="text-stone-500 font-medium">Order Number:</span>
-                <span className="font-bold text-stone-900 text-sm">
+                <span className="font-semibold text-stone-900 text-xs sm:text-sm tracking-wide break-all">
                   {placedOrder.orderNumber}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-stone-500">Order Status:</span>
-                <span className="px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold uppercase tracking-wider">
-                  Pending Admin Confirmation
-                </span>
+              <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-1.5">
+                <span className="text-stone-500 font-medium">Order Status:</span>
+                <div className="shrink-0">
+                  {getOrderStatusBadge(placedOrder.orderStatus)}
+                </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-stone-500">Payment Proof:</span>
-                <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold uppercase tracking-wider">
-                  Screenshot Uploaded
-                </span>
+              {placedOrder.paymentStatus && (
+                <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-1.5">
+                  <span className="text-stone-500 font-medium">Payment Status:</span>
+                  <div className="shrink-0">
+                    {getPaymentStatusBadge(placedOrder.paymentStatus)}
+                  </div>
+                </div>
+              )}
+              <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-1.5">
+                <span className="text-stone-500 font-medium">Payment Proof:</span>
+                <div className="shrink-0">
+                  {proofUrl ? (
+                    <a
+                      href={proofUrl}
+                      onClick={handleOpenPaymentProof}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="View payment proof screenshot in new tab"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 border border-blue-200 text-[10px] sm:text-[11px] font-semibold tracking-wider rounded-[2px] transition-all cursor-pointer group active:scale-95"
+                    >
+                      <span>Screenshot Uploaded</span>
+                      <FiExternalLink className="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </a>
+                  ) : (
+                    <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 text-[10px] sm:text-[11px] font-semibold tracking-wider rounded-[2px]">
+                      Verified
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex justify-between items-center pt-2.5 border-t border-stone-200">
                 <span className="text-stone-500 font-medium">Total Paid:</span>
-                <span className="font-bold text-stone-900 text-base">
+                <span className="font-bold text-stone-900 text-sm sm:text-base">
                   ₹{Number(placedOrder.totalAmount || totalAmount).toLocaleString("en-IN")}
                 </span>
               </div>
             </div>
 
             {/* Delivery Recipient Details */}
-            <div className="mt-4 p-5 bg-white border border-stone-200 text-left text-xs space-y-1.5 text-stone-600">
-              <p className="font-bold text-stone-900 uppercase tracking-wider text-[11px] mb-2">
+            <div className="mt-3.5 sm:mt-4 p-3.5 sm:p-5 bg-white border border-stone-200 text-left text-xs sm:text-[13px] space-y-1 text-stone-600">
+              <p className="font-semibold text-stone-900 tracking-wider text-[11px] sm:text-xs mb-1.5 uppercase">
                 Shipping To:
               </p>
-              <p className="font-semibold text-stone-800">{placedOrder.customer?.name}</p>
-              <p>{placedOrder.shippingAddress?.street}</p>
-              <p>
+              <p className="font-semibold text-stone-800 break-words">{placedOrder.customer?.name}</p>
+              <p className="break-words">{placedOrder.shippingAddress?.street}</p>
+              <p className="break-words">
                 {placedOrder.shippingAddress?.city}, {placedOrder.shippingAddress?.state} -{" "}
                 {placedOrder.shippingAddress?.postalCode}
               </p>
               <p>Phone: +91 {placedOrder.customer?.phone}</p>
             </div>
 
+            {/* 24/7 Customer Satisfaction Support with direct WhatsApp Redirect */}
+            <div className="mt-3.5 sm:mt-4 p-3 sm:p-3.5 bg-stone-50 border border-stone-200 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-[13px] text-stone-700 text-center flex-wrap leading-relaxed">
+              <RiWhatsappLine className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>
+                Have any queries regarding your order? We are here 24/7:{" "}
+                <a
+                  href={`https://wa.me/917600152171?text=${encodeURIComponent(
+                    `Hi Eclera, I have a query regarding my order #${placedOrder.orderNumber}.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 font-semibold text-[#5B6240] hover:text-[#474D32] transition-colors cursor-pointer"
+                >
+                  Support
+                </a>
+              </span>
+            </div>
+
             {/* Action Button */}
-            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/shop"
-                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs sm:text-sm font-semibold tracking-wider transition-colors shadow-xs active:scale-[0.99]"
               >
                 <span>Continue Shopping</span>
                 <FiArrowRight className="w-4 h-4" />
@@ -661,37 +995,35 @@ export default function CartClient() {
   }
 
   // ----------------------------------------------------
-  // EMPTY CART STATE
+  // EMPTY CART STATE - SHORT MINIMAL UI
   // ----------------------------------------------------
   if (cartItems.length === 0) {
     return (
-      <div className="w-full bg-[#FAF7F5] min-h-screen pb-20 pt-8 sm:pt-12">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumb */}
-          <nav className="flex items-center space-x-2 text-xs text-stone-500 font-medium mb-6">
-            <Link href="/" className="hover:text-[#5B6240]">Home</Link>
-            <FiChevronRight className="w-3.5 h-3.5 text-stone-400" />
-            <span className="text-stone-900 font-bold uppercase tracking-wider text-[11px]">Shopping Bag</span>
-          </nav>
-
-          <div className="bg-white border border-stone-200 p-12 sm:p-20 text-center max-w-xl mx-auto shadow-2xs">
-            <div className="w-16 h-16 bg-stone-100 text-stone-400 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FiShoppingBag className="w-8 h-8" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 mb-2">
-              Your Shopping Bag is Empty
-            </h2>
-            <p className="text-xs sm:text-sm text-stone-500 mb-6 max-w-sm mx-auto">
-              Looks like you haven't added any botanical skincare formulations to your bag yet.
-            </p>
-            <Link
-              href="/shop"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider transition-colors"
-            >
-              <span>Explore Products</span>
-              <FiArrowRight className="w-4 h-4" />
-            </Link>
+      <div className="w-full bg-[#FAF7F5] min-h-[75vh] flex items-center justify-center py-16 px-4">
+        <div className="text-center max-w-md mx-auto">
+          {/* Cart Empty Icon */}
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 rounded-full bg-[#5B6240]/10 border border-[#5B6240]/20 flex items-center justify-center text-[#5B6240]">
+            <FiShoppingBag className="w-9 h-9 sm:w-10 sm:h-10 stroke-[1.5]" />
           </div>
+
+          {/* Title */}
+          <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-2.5 tracking-tight">
+            Your Shopping Cart is Empty
+          </h1>
+
+          {/* Description */}
+          <p className="text-xs sm:text-sm text-stone-600 max-w-sm mx-auto leading-relaxed mb-6">
+            Looks like your cart is empty. Explore our products and add your favorites to get started.
+          </p>
+
+          {/* Shop Now Button */}
+          <Link
+            href="/shop"
+            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold tracking-wider transition-colors shadow-xs active:scale-95"
+          >
+            <span>Shop Now</span>
+            <FiArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     );
@@ -711,8 +1043,8 @@ export default function CartClient() {
               Shop
             </Link>
             <FiChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-            <span className="text-stone-900 font-semibold uppercase tracking-wider text-[11px]">
-              {step === 1 ? "Bag" : step === 2 ? "Order" : "Payment"}
+            <span className="text-stone-900 font-semibold tracking-wider text-[11px]">
+              {step === 1 ? "Cart" : step === 2 ? "Order" : "Payment"}
             </span>
           </nav>
         </div>
@@ -727,16 +1059,14 @@ export default function CartClient() {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold cursor-pointer transition-colors ${
-                  step >= 1 ? "bg-[#5B6240] text-white" : "bg-stone-200 text-stone-600"
-                }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold cursor-pointer transition-colors ${step >= 1 ? "bg-[#5B6240] text-white" : "bg-stone-200 text-stone-600"
+                  }`}
               >
                 1
               </button>
-              <span className={`ml-2 text-xs font-semibold uppercase tracking-wider hidden sm:inline ${
-                step === 1 ? "text-[#5B6240]" : "text-stone-600"
-              }`}>
-                Bag
+              <span className={`ml-2 text-xs font-semibold tracking-wider hidden sm:inline ${step === 1 ? "text-[#5B6240]" : "text-stone-600"
+                }`}>
+                Cart
               </span>
             </div>
 
@@ -749,15 +1079,13 @@ export default function CartClient() {
                 onClick={() => {
                   if (cartItems.length > 0) setStep(2);
                 }}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold cursor-pointer transition-colors ${
-                  step >= 2 ? "bg-[#5B6240] text-white" : "bg-stone-200 text-stone-600"
-                }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold cursor-pointer transition-colors ${step >= 2 ? "bg-[#5B6240] text-white" : "bg-stone-200 text-stone-600"
+                  }`}
               >
                 2
               </button>
-              <span className={`ml-2 text-xs font-semibold uppercase tracking-wider hidden sm:inline ${
-                step === 2 ? "text-[#5B6240]" : "text-stone-600"
-              }`}>
+              <span className={`ml-2 text-xs font-semibold tracking-wider hidden sm:inline ${step === 2 ? "text-[#5B6240]" : "text-stone-600"
+                }`}>
                 Order
               </span>
             </div>
@@ -767,15 +1095,13 @@ export default function CartClient() {
             {/* Step 3 */}
             <div className="flex items-center">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                  step >= 3 ? "bg-[#5B6240] text-white" : "bg-stone-200 text-stone-600"
-                }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${step >= 3 ? "bg-[#5B6240] text-white" : "bg-stone-200 text-stone-600"
+                  }`}
               >
                 3
               </div>
-              <span className={`ml-2 text-xs font-semibold uppercase tracking-wider hidden sm:inline ${
-                step === 3 ? "text-[#5B6240]" : "text-stone-600"
-              }`}>
+              <span className={`ml-2 text-xs font-semibold tracking-wider hidden sm:inline ${step === 3 ? "text-[#5B6240]" : "text-stone-600"
+                }`}>
                 Payment
               </span>
             </div>
@@ -792,15 +1118,9 @@ export default function CartClient() {
             {step === 1 && (
               <div className="bg-white border border-stone-200 shadow-2xs">
                 <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between">
-                  <h2 className="text-sm sm:text-base font-bold text-stone-900 uppercase tracking-wider">
-                    Bag Items ({cartItems.reduce((acc, it) => acc + it.quantity, 0)})
+                  <h2 className="text-sm sm:text-base font-semibold text-stone-900 tracking-wider">
+                    Cart ({cartItems.reduce((acc, it) => acc + it.quantity, 0)})
                   </h2>
-                  <Link
-                    href="/shop"
-                    className="text-xs text-[#5B6240] hover:underline font-semibold"
-                  >
-                    + Add More Items
-                  </Link>
                 </div>
 
                 <div className="divide-y divide-stone-100">
@@ -815,12 +1135,13 @@ export default function CartClient() {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/product/${item.slug}`}
+                          title={item.name}
                           className="text-xs sm:text-sm font-semibold text-stone-900 hover:text-[#5B6240] transition-colors line-clamp-2"
                         >
                           {item.name}
                         </Link>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs sm:text-sm font-bold text-stone-900">
+                          <span className="text-xs sm:text-sm font-semibold text-stone-900">
                             ₹{Number(item.price).toLocaleString("en-IN")}
                           </span>
                           {item.comparePrice && item.comparePrice > item.price && (
@@ -841,7 +1162,7 @@ export default function CartClient() {
                             >
                               <FiMinus className="w-3 h-3" />
                             </button>
-                            <span className="w-8 text-center text-xs font-bold text-stone-900">
+                            <span className="w-8 text-center text-xs font-semibold text-stone-900">
                               {item.quantity}
                             </span>
                             <button
@@ -867,7 +1188,7 @@ export default function CartClient() {
 
                       {/* Total for item */}
                       <div className="text-right shrink-0">
-                        <span className="text-xs sm:text-sm font-bold text-stone-900">
+                        <span className="text-xs sm:text-sm font-semibold text-stone-900">
                           ₹{(Number(item.price) * Number(item.quantity)).toLocaleString("en-IN")}
                         </span>
                       </div>
@@ -877,8 +1198,8 @@ export default function CartClient() {
 
                 {/* Bottom Action */}
                 <div className="p-4 sm:p-5 bg-stone-50 border-t border-stone-200 flex justify-between items-center">
-                  <span className="text-xs text-stone-600">
-                    Subtotal: <strong className="text-stone-900">₹{subtotal.toLocaleString("en-IN")}</strong>
+                  <span className="text-xs sm:text-sm text-stone-600">
+                    Subtotal: <strong className="text-sm sm:text-base font-semibold text-stone-900">₹{subtotal.toLocaleString("en-IN")}</strong>
                   </span>
                   <button
                     type="button"
@@ -886,9 +1207,9 @@ export default function CartClient() {
                       syncAbandonedCart("contact_info");
                       setStep(2);
                     }}
-                    className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
+                    className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold tracking-wider flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
                   >
-                    <span>Proceed To Order Info</span>
+                    <span>Place Order</span>
                     <FiArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -899,7 +1220,7 @@ export default function CartClient() {
             {step === 2 && (
               <form onSubmit={handleProceedToPayment} className="bg-white border border-stone-200 shadow-2xs p-5 sm:p-7 space-y-5">
                 <div className="flex items-center justify-between pb-3 border-b border-stone-200">
-                  <h2 className="text-sm sm:text-base font-bold text-stone-900 uppercase tracking-wider">
+                  <h2 className="text-sm sm:text-base font-semibold text-stone-900 tracking-wider">
                     Order Information
                   </h2>
                   <button
@@ -908,7 +1229,7 @@ export default function CartClient() {
                     className="text-xs text-[#5B6240] hover:underline flex items-center gap-1"
                   >
                     <FiArrowLeft className="w-3.5 h-3.5" />
-                    <span>Back to Bag</span>
+                    <span>Back to Cart</span>
                   </button>
                 </div>
 
@@ -921,7 +1242,7 @@ export default function CartClient() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 tracking-wide">
                       Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -935,7 +1256,7 @@ export default function CartClient() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 tracking-wide">
                       Mobile Number <span className="text-red-500">*</span>
                     </label>
                     <div className="flex h-11">
@@ -956,12 +1277,12 @@ export default function CartClient() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
-                    Email Address <span className="text-stone-400 font-normal">(For order receipt)</span>
+                  <label className="text-xs font-semibold text-stone-700 tracking-wide">
+                    Email Address <span className="text-stone-400 font-normal text-[11px]">(Optional)</span>
                   </label>
                   <input
                     type="email"
-                    placeholder="Enter your email id"
+                    placeholder="Enter your email id (Optional)"
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     className="w-full h-11 px-3.5 py-2.5 text-xs sm:text-sm bg-white border border-stone-300 focus:border-[#5B6240] focus:ring-1 focus:ring-[#5B6240] focus:outline-none transition-colors text-stone-900"
@@ -971,7 +1292,7 @@ export default function CartClient() {
                 {/* Country and State Selection */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 tracking-wide">
                       Country <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -998,7 +1319,7 @@ export default function CartClient() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 tracking-wide">
                       State / Province <span className="text-red-500">*</span>
                     </label>
                     {getStatesForCountry(country).length > 0 ? (
@@ -1028,7 +1349,7 @@ export default function CartClient() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                  <label className="text-xs font-semibold text-stone-700 tracking-wide">
                     Street Address / Flat / House No. <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1043,7 +1364,7 @@ export default function CartClient() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 tracking-wide">
                       City <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1057,7 +1378,7 @@ export default function CartClient() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 tracking-wide">
                       Postal Code / PIN <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -1076,13 +1397,13 @@ export default function CartClient() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="px-5 py-2.5 border border-stone-300 text-stone-700 text-xs font-semibold uppercase tracking-wider hover:bg-stone-50 cursor-pointer"
+                    className="px-5 py-2.5 border border-stone-300 text-stone-700 text-xs font-semibold tracking-wider hover:bg-stone-50 cursor-pointer"
                   >
-                    Back to Bag
+                    Back to Cart
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
+                    className="px-6 py-3 bg-[#5B6240] hover:bg-[#474D32] text-white text-xs font-semibold tracking-wider flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
                   >
                     <span>Continue to Payment</span>
                     <FiArrowRight className="w-4 h-4" />
@@ -1093,13 +1414,14 @@ export default function CartClient() {
 
             {/* STEP 3: QR CODE PAYMENT & SCREENSHOT PROOF UPLOAD */}
             {step === 3 && (
-              <div className="bg-white border border-stone-200 shadow-2xs p-5 sm:p-7 space-y-6">
+              <>
+                <div className="bg-white border border-stone-200 shadow-2xs p-5 sm:p-7 space-y-6">
                 <div className="flex items-center justify-between pb-3 border-b border-stone-200">
                   <div>
-                    <span className="text-[10px] font-bold tracking-widest text-[#5B6240] uppercase">
+                    <span className="text-[10px] font-semibold tracking-widest text-[#5B6240]">
                       Final Step
                     </span>
-                    <h2 className="text-sm sm:text-base font-bold text-stone-900 uppercase tracking-wider">
+                    <h2 className="text-sm sm:text-base font-semibold text-stone-900 tracking-wider">
                       Pay via UPI QR Code & Upload Proof
                     </h2>
                   </div>
@@ -1129,8 +1451,8 @@ export default function CartClient() {
                       alt="UPI Payment QR Code"
                       className="w-44 h-44 object-contain"
                     />
-                    <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mt-2">
-                      Scan To Pay
+                    <span className="text-[10px] font-semibold text-stone-500 tracking-wider mt-2">
+                      Scan to Pay
                     </span>
                   </div>
 
@@ -1138,7 +1460,7 @@ export default function CartClient() {
                   <div className="flex-1 space-y-3 text-center sm:text-left">
                     <div>
                       <span className="text-[11px] text-stone-500 font-medium">Total Payable Amount</span>
-                      <p className="text-2xl sm:text-3xl font-extrabold text-[#5B6240] tracking-tight">
+                      <p className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
                         ₹{totalAmount.toLocaleString("en-IN")}
                       </p>
                     </div>
@@ -1150,7 +1472,7 @@ export default function CartClient() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-stone-500">UPI ID:</span>
-                        <span className="font-bold text-stone-900">8866002766@kotakbank</span>
+                        <span className="font-semibold text-stone-900">8866002766@kotakbank</span>
                       </div>
                     </div>
 
@@ -1163,30 +1485,53 @@ export default function CartClient() {
                 {/* Upload Payment Screenshot Proof */}
                 <div className="space-y-4 pt-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                    <label className="text-xs font-semibold text-stone-900 tracking-wider">
                       Upload Payment Screenshot <span className="text-red-500">*</span>
                     </label>
-                    <span className="text-[11px] text-stone-400">Required for Admin verification</span>
                   </div>
 
                   {!screenshotPreview ? (
-                    <label className="border-2 border-dashed border-stone-300 hover:border-[#5B6240] p-6 sm:p-8 flex flex-col items-center justify-center cursor-pointer bg-stone-50/50 hover:bg-[#FAF9F5] transition-colors group">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-stone-400 group-hover:text-[#5B6240] shadow-xs mb-3 transition-colors">
-                        <FiUploadCloud className="w-6 h-6" />
-                      </div>
-                      <span className="text-xs font-bold text-stone-800 uppercase tracking-wider">
-                        Click to upload payment screenshot
-                      </span>
-                      <span className="text-[11px] text-stone-400 mt-1">
-                        PNG, JPG, or WEBP (Max 10MB)
-                      </span>
-                    </label>
+                    <div>
+                      <label
+                        id="payment-screenshot-upload-box"
+                        className={`border-2 border-dashed p-6 sm:p-8 flex flex-col items-center justify-center cursor-pointer transition-colors group ${
+                          screenshotError
+                            ? "border-red-500 bg-red-50/40 ring-1 ring-red-500"
+                            : "border-stone-300 hover:border-[#5B6240] bg-stone-50/50 hover:bg-[#FAF9F5]"
+                        }`}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                        <div
+                          className={`w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xs mb-3 transition-colors ${
+                            screenshotError ? "text-red-500" : "text-stone-400 group-hover:text-[#5B6240]"
+                          }`}
+                        >
+                          <FiUploadCloud className="w-6 h-6" />
+                        </div>
+                        <span
+                          className={`text-xs font-semibold tracking-wider ${
+                            screenshotError ? "text-red-700" : "text-stone-800"
+                          }`}
+                        >
+                          Click to upload payment screenshot
+                        </span>
+                        <span className="text-[11px] text-stone-400 mt-1">
+                          PNG, JPG, or WEBP (Max 10MB)
+                        </span>
+                      </label>
+
+                      {/* Error message without icon */}
+                      {screenshotError && (
+                        <div className="mt-2.5 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-none leading-relaxed">
+                          <span>{screenshotError}</span>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="border border-stone-200 bg-white p-4 flex flex-col sm:flex-row items-center gap-4">
                       <div className="relative w-28 h-28 bg-stone-100 border border-stone-200 overflow-hidden shrink-0">
@@ -1200,14 +1545,12 @@ export default function CartClient() {
                       <div className="flex-1 space-y-1.5 text-center sm:text-left">
                         <div className="flex items-center gap-2 justify-center sm:justify-start">
                           <FiCheck className="w-4 h-4 text-emerald-600" />
-                          <span className="text-xs font-bold text-stone-900">
+                          <span className="text-xs font-semibold text-stone-900">
                             Screenshot Proof Attached
                           </span>
                         </div>
                         <p className="text-[11px] text-stone-500">
-                          {uploadingProof
-                            ? "Processing image..."
-                            : "Screenshot verified and ready to submit with order."}
+                          Screenshot attached and ready to submit with order.
                         </p>
 
                         <div className="pt-2 flex gap-3 justify-center sm:justify-start">
@@ -1224,7 +1567,8 @@ export default function CartClient() {
                             type="button"
                             onClick={() => {
                               setScreenshotPreview("");
-                              setPaymentScreenshot("");
+                              setSelectedProof(null);
+                              setScreenshotError(null);
                             }}
                             className="text-xs text-red-600 hover:underline cursor-pointer font-semibold"
                           >
@@ -1237,7 +1581,7 @@ export default function CartClient() {
 
                   {/* Optional UTR / Reference ID */}
                   <div className="space-y-1.5 pt-2">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-stone-700 tracking-wide">
                       UPI Reference / UTR Number <span className="text-stone-400 font-normal">(Optional, helps faster verification)</span>
                     </label>
                     <input
@@ -1260,24 +1604,70 @@ export default function CartClient() {
                   <button
                     type="button"
                     onClick={handlePlaceOrder}
-                    disabled={submittingOrder || uploadingProof}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-[#5B6240] hover:bg-[#474D32] disabled:bg-stone-300 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-colors"
+                    disabled={submittingOrder}
+                    className="w-full sm:w-auto px-8 py-3.5 bg-[#5B6240] hover:bg-[#474D32] disabled:bg-stone-300 text-white text-xs font-semibold tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-colors"
                   >
                     {submittingOrder ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Submitting Order...</span>
+                        <span>Placing Order...</span>
                       </>
                     ) : (
                       <>
                         <FiCheck className="w-4 h-4" />
-                        <span>Submit Order For Confirmation</span>
+                        <span>Order Now</span>
                       </>
                     )}
                   </button>
                 </div>
               </div>
-            )}
+
+              {/* Standalone Separate Security & Trust Block with 24/7 WhatsApp Support (Placed at the very end/last) */}
+              <div className="mt-6 bg-white border border-stone-200 p-5 space-y-4 shadow-2xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="p-2.5 bg-[#FAF9F5] border border-stone-200 flex items-center gap-2">
+                    <FiShield className="w-4 h-4 text-[#5B6240] shrink-0" />
+                    <div>
+                      <p className="text-[11px] font-semibold text-stone-900">100% Secure Payment</p>
+                      <p className="text-[10px] text-stone-500">Verified UPI transaction</p>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 bg-[#FAF9F5] border border-stone-200 flex items-center gap-2">
+                    <FiCheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div>
+                      <p className="text-[11px] font-semibold text-stone-900">Verified Merchant</p>
+                      <p className="text-[10px] text-stone-500">Khokhani Prit Ghanshyambhai</p>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 bg-[#FAF9F5] border border-stone-200 flex items-center gap-2">
+                    <FiLock className="w-4 h-4 text-[#5B6240] shrink-0" />
+                    <div>
+                      <p className="text-[11px] font-semibold text-stone-900">SSL Protected</p>
+                      <p className="text-[10px] text-stone-500">End-to-end encrypted</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 24/7 Customer Satisfaction Support with direct WhatsApp Redirect */}
+                <div className="p-3 bg-stone-50 border border-stone-200 flex items-center justify-center gap-2 text-xs text-stone-700 text-center">
+                  <RiWhatsappLine className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    Have any queries regarding your order? We are here 24/7:{" "}
+                    <a
+                      href="https://wa.me/917600152171?text=Hi%20Eclera%2C%20I%20have%20a%20query%20regarding%20my%20order."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline font-semibold text-[#5B6240] hover:text-[#474D32] transition-colors cursor-pointer"
+                    >
+                      Support
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
           </div>
 
           {/* ============================================================
@@ -1287,35 +1677,47 @@ export default function CartClient() {
             {/* 1. Coupon Section */}
             <div className="bg-white border border-stone-200 shadow-2xs p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-stone-900 uppercase tracking-wider flex items-center gap-1.5">
-                  <FiTag className="w-3.5 h-3.5 text-[#5B6240]" />
+                <span className="text-sm sm:text-base font-semibold text-stone-900 tracking-wider flex items-center gap-2">
+                  <FiTag className="w-4 h-4 text-[#5B6240]" />
                   <span>Coupons & Offers</span>
                 </span>
               </div>
 
               {/* If Coupon is already applied */}
               {appliedCoupon ? (
-                <div className="p-3 bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs">
-                      <FiCheck className="w-3.5 h-3.5" />
+                <div className="space-y-2">
+                  <div className="p-3 bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs">
+                        <FiCheck className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-emerald-900">
+                          {appliedCoupon.code} Applied
+                        </p>
+                        <p className="text-[11px] text-emerald-700">
+                          You saved ₹{appliedCoupon.discountAmount}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-emerald-900">
-                        {appliedCoupon.code} APPLIED
-                      </p>
-                      <p className="text-[11px] text-emerald-700">
-                        You saved ₹{appliedCoupon.discountAmount}
-                      </p>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="text-xs font-semibold text-red-600 hover:underline cursor-pointer tracking-wider"
+                    >
+                      Remove
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleRemoveCoupon}
-                    className="text-xs font-bold text-red-600 hover:underline cursor-pointer uppercase tracking-wider"
-                  >
-                    Remove
-                  </button>
+                  <div className="flex items-center justify-between text-[11px] text-stone-500 pt-1">
+                    <span>• Only 1 coupon applied per order</span>
+                    <button
+                      type="button"
+                      onClick={handleOpenCouponModal}
+                      className="text-[#5B6240] hover:underline font-semibold"
+                    >
+                      Change Coupon
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -1326,17 +1728,17 @@ export default function CartClient() {
                       placeholder="Enter coupon code"
                       value={couponInput}
                       onChange={(e) => {
-                        setCouponInput(e.target.value);
+                        setCouponInput(e.target.value.toUpperCase());
                         setCouponError(null);
                         setCouponSuccess(null);
                       }}
-                      className="flex-1 px-3 py-2 text-xs uppercase font-medium tracking-wider border border-stone-300 focus:border-[#5B6240] focus:outline-none"
+                      className="flex-1 px-3 py-2 text-xs font-medium tracking-wider border border-stone-300 focus:border-[#5B6240] focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => handleApplyCouponCode(couponInput)}
                       disabled={couponLoading}
-                      className="px-5 py-2 bg-[#5B6240] hover:bg-[#474D32] disabled:bg-stone-300 text-white text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors"
+                      className="px-5 py-2 bg-[#5B6240] hover:bg-[#474D32] disabled:bg-stone-300 text-white text-xs font-semibold tracking-wider cursor-pointer transition-colors"
                     >
                       {couponLoading ? "Checking..." : "Apply"}
                     </button>
@@ -1358,11 +1760,11 @@ export default function CartClient() {
 
                   {/* "You don't have any coupon? View all" Link */}
                   <div className="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
-                    <span className="text-stone-500">You don't have any coupon?</span>
+                    <span className="text-stone-500">Only 1 coupon applicable per order</span>
                     <button
                       type="button"
                       onClick={handleOpenCouponModal}
-                      className="text-[#5B6240] hover:text-[#474D32] font-bold uppercase tracking-wider text-[11px] hover:underline cursor-pointer"
+                      className="text-[#5B6240] hover:text-[#474D32] font-semibold tracking-wider text-[11px] hover:underline cursor-pointer"
                     >
                       View All Coupons
                     </button>
@@ -1372,34 +1774,34 @@ export default function CartClient() {
             </div>
 
             {/* 2. Order Summary Card */}
-            <div className="bg-white border border-stone-200 shadow-2xs p-5 space-y-4">
-              <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider pb-3 border-b border-stone-200">
+            <div className="bg-white border border-stone-200 shadow-2xs p-5 sm:p-6 space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold text-stone-900 tracking-wider pb-3 border-b border-stone-200">
                 Order Summary
               </h3>
 
-              <div className="space-y-2.5 text-xs text-stone-600">
-                <div className="flex justify-between">
-                  <span>Bag Subtotal ({cartItems.reduce((acc, it) => acc + it.quantity, 0)} items)</span>
-                  <span className="font-semibold text-stone-900">₹{subtotal.toLocaleString("en-IN")}</span>
+              <div className="space-y-3 text-xs sm:text-sm text-stone-600">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs sm:text-sm text-stone-600">Cart Subtotal ({cartItems.reduce((acc, it) => acc + it.quantity, 0)} items)</span>
+                  <span className="font-semibold text-stone-900 text-sm sm:text-base">₹{subtotal.toLocaleString("en-IN")}</span>
                 </div>
 
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-700 font-semibold">
-                    <span>Coupon Savings ({appliedCoupon?.code})</span>
+                  <div className="flex justify-between items-center text-emerald-700 font-semibold">
+                    <span>Coupon Discount</span>
                     <span>-₹{discountAmount.toLocaleString("en-IN")}</span>
                   </div>
                 )}
 
                 <div className="flex justify-between items-center">
                   <span>Shipping & Delivery</span>
-                  <span className="text-emerald-700 font-bold uppercase text-[11px]">Free Delivery</span>
+                  <span className="text-emerald-700 font-semibold text-xs">Free Delivery</span>
                 </div>
 
-                <div className="pt-3 border-t border-stone-200 flex justify-between items-baseline">
-                  <span className="text-sm font-bold text-stone-900 uppercase tracking-wide">
+                <div className="pt-3.5 border-t border-stone-200 flex justify-between items-baseline">
+                  <span className="text-sm sm:text-base font-semibold text-stone-900 tracking-wide">
                     Total Amount
                   </span>
-                  <span className="text-xl font-extrabold text-[#5B6240]">
+                  <span className="text-xl sm:text-2xl font-bold text-stone-900">
                     ₹{totalAmount.toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -1408,7 +1810,7 @@ export default function CartClient() {
               {/* Step Navigation / Information */}
               <div className="pt-3 text-[11px] text-stone-500 flex items-center gap-1.5 border-t border-stone-100">
                 <FiClock className="w-3.5 h-3.5 text-[#5B6240]" />
-                <span>Orders confirmed within 15 minutes of payment verification</span>
+                <span>Orders confirmed within 15 minutes of payment verification.</span>
               </div>
             </div>
           </div>
@@ -1432,9 +1834,12 @@ export default function CartClient() {
             <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
               <div className="flex items-center gap-2">
                 <FiTag className="w-4 h-4 text-[#5B6240]" />
-                <h3 className="text-xs sm:text-sm font-bold text-stone-900 uppercase tracking-wider">
-                  Available Coupons ({availableCoupons.length})
-                </h3>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-semibold text-stone-900 tracking-wider">
+                    Available Coupons ({availableCoupons.length})
+                  </h3>
+                  <p className="text-[11px] text-stone-500">Only 1 coupon can be applied per order</p>
+                </div>
               </div>
               <button
                 type="button"
@@ -1467,18 +1872,17 @@ export default function CartClient() {
                   return (
                     <div
                       key={c.code}
-                      className={`border p-4 transition-all relative ${
-                        isCurrentlyApplied
+                      className={`border p-4 transition-all relative ${isCurrentlyApplied
                           ? "border-emerald-500 bg-emerald-50/30 ring-1 ring-emerald-500"
                           : isEligible
-                          ? "border-stone-200 bg-white hover:border-[#5B6240]"
-                          : "border-stone-200 bg-stone-50/60 opacity-80"
-                      }`}
+                            ? "border-stone-200 bg-white hover:border-[#5B6240]"
+                            : "border-stone-200 bg-stone-50/60 opacity-80"
+                        }`}
                     >
                       {/* Top Row: Code Badge + Action Button */}
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 font-bold text-xs bg-stone-100 text-stone-900 border border-dashed border-stone-400 uppercase tracking-wider">
+                          <span className="px-3 py-1 font-semibold text-xs bg-stone-100 text-stone-900 border border-dashed border-stone-400 uppercase tracking-wider">
                             {c.code}
                           </span>
                           <button
@@ -1488,7 +1892,7 @@ export default function CartClient() {
                             className="p-1 text-stone-400 hover:text-stone-700 cursor-pointer text-xs"
                           >
                             {copiedCode === c.code ? (
-                              <span className="text-[10px] text-emerald-600 font-bold">COPIED</span>
+                              <span className="text-[10px] text-emerald-600 font-semibold">COPIED</span>
                             ) : (
                               <FiCopy className="w-3.5 h-3.5" />
                             )}
@@ -1497,7 +1901,7 @@ export default function CartClient() {
 
                         {/* Apply / Applied Button */}
                         {isCurrentlyApplied ? (
-                          <span className="text-xs font-bold text-emerald-700 uppercase flex items-center gap-1">
+                          <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
                             <FiCheck className="w-3.5 h-3.5" />
                             Applied
                           </span>
@@ -1506,58 +1910,58 @@ export default function CartClient() {
                             type="button"
                             disabled={!isEligible}
                             onClick={() => handleApplyCouponCode(c.code)}
-                            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                              isEligible
+                            className={`px-4 py-1.5 text-xs font-semibold tracking-wider transition-colors cursor-pointer ${isEligible
                                 ? "bg-[#5B6240] hover:bg-[#474D32] text-white shadow-xs"
                                 : "bg-stone-200 text-stone-400 cursor-not-allowed"
-                            }`}
+                              }`}
                           >
                             Apply
                           </button>
                         )}
                       </div>
 
-                      {/* Coupon Discount Details description formatted from admin panel rules */}
-                      <div className="mt-2.5 space-y-1">
-                        <p className="text-xs font-bold text-stone-900">
+                      {/* Coupon Discount Details formatted as <ul> <li> list with bullets */}
+                      <ul className="mt-2.5 list-disc pl-4 space-y-1 text-xs text-stone-600">
+                        <li className="font-semibold text-stone-900">
                           {c.savingsDescription ||
                             (c.type === "percentage"
-                              ? `Get ${c.value}% OFF${
-                                  c.maxDiscountAmount && c.maxDiscountAmount > 0
-                                    ? ` up to ₹${c.maxDiscountAmount}`
-                                    : ""
-                                }`
+                              ? `Get ${c.value}% OFF${c.maxDiscountAmount && c.maxDiscountAmount > 0
+                                ? ` up to ₹${c.maxDiscountAmount}`
+                                : ""
+                              }`
                               : `Flat ₹${c.value} OFF`)}
-                        </p>
+                        </li>
 
                         {c.description ? (
-                          <p className="text-xs text-stone-600 leading-snug">
+                          <li className="text-stone-600 leading-snug">
                             {c.description}
-                          </p>
+                          </li>
                         ) : null}
 
-                        {/* Eligibility Points */}
-                        <div className="pt-2 text-[11px] space-y-1">
-                          {minRequired > 0 && (
-                            <p className="text-stone-500 font-medium">
-                              • Minimum cart value: <strong>₹{minRequired}</strong>
-                            </p>
-                          )}
+                        {minRequired > 0 && (
+                          <li className="text-stone-600">
+                            Minimum cart value: <strong className="text-stone-800">₹{minRequired.toLocaleString("en-IN")}</strong>
+                          </li>
+                        )}
 
-                          {/* If NOT eligible, show exact required reason */}
-                          {!isEligible && (
-                            <p className="text-amber-700 font-semibold bg-amber-50 px-2 py-1 border border-amber-200">
-                              ⚠ Not Eligible: Add ₹{diff} more items to your bag to unlock this offer (Current total: ₹{subtotal}).
-                            </p>
-                          )}
+                        {c.type === "percentage" && c.maxDiscountAmount && c.maxDiscountAmount > 0 && !c.savingsDescription?.includes("Up to") && (
+                          <li className="text-stone-600">
+                            Maximum discount: <strong className="text-stone-800">₹{c.maxDiscountAmount.toLocaleString("en-IN")}</strong>
+                          </li>
+                        )}
 
-                          {isEligible && !isCurrentlyApplied && (
-                            <p className="text-emerald-700 font-medium">
-                              ✓ Your cart is eligible for this coupon!
-                            </p>
-                          )}
-                        </div>
-                      </div>
+                        {!isEligible && (
+                          <li className="text-amber-700 font-medium">
+                            Add ₹{diff.toLocaleString("en-IN")} more to unlock this coupon (Current: ₹{subtotal.toLocaleString("en-IN")})
+                          </li>
+                        )}
+
+                        {isEligible && !isCurrentlyApplied && (
+                          <li className="text-emerald-700 font-medium">
+                            Your cart is eligible for this coupon!
+                          </li>
+                        )}
+                      </ul>
                     </div>
                   );
                 })
@@ -1572,7 +1976,7 @@ export default function CartClient() {
               <button
                 type="button"
                 onClick={() => setCouponModalOpen(false)}
-                className="px-4 py-1.5 border border-stone-300 text-stone-700 font-semibold uppercase text-[11px] hover:bg-stone-100 cursor-pointer"
+                className="px-4 py-1.5 border border-stone-300 text-stone-700 font-semibold text-[11px] hover:bg-stone-100 cursor-pointer"
               >
                 Close
               </button>

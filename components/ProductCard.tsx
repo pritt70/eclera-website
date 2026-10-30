@@ -133,7 +133,7 @@ export function ProductCard({ product, isAdded, onQuickAdd }: ProductCardProps) 
 
             onQuickAdd(product, e);
           }}
-          className={`absolute bottom-3.5 left-1/2 -translate-x-1/2 z-10 w-[84%] max-w-[210px] py-2.5 px-3 font-semibold text-xs tracking-wider uppercase transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer rounded-none shadow-md ${
+          className={`absolute bottom-3.5 left-1/2 -translate-x-1/2 z-10 w-[84%] max-w-[210px] py-2.5 px-3 font-semibold text-xs tracking-wider transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer rounded-none shadow-md ${
             isAdded
               ? "bg-[#383d25] text-white"
               : "bg-[#5B6240] text-white hover:bg-[#464c30] active:scale-[0.98]"
@@ -143,12 +143,12 @@ export function ProductCard({ product, isAdded, onQuickAdd }: ProductCardProps) 
           {isAdded ? (
             <>
               <FiCheck className="w-3.5 h-3.5 text-white" />
-              <span>ADDED TO BAG</span>
+              <span>Added to Cart</span>
             </>
           ) : (
             <>
               <FiShoppingBag className="w-3.5 h-3.5 text-white" />
-              <span>QUICK ADD</span>
+              <span>Quick Add</span>
             </>
           )}
         </button>
@@ -167,9 +167,13 @@ export function ProductCard({ product, isAdded, onQuickAdd }: ProductCardProps) 
           {/* Product Title (Consistent 2-line height for aligned cards) */}
           <Link
             href={`/product/${product.slug}`}
+            title={product.name}
             className="block text-stone-900 group-hover:text-[#5B6240] transition-colors"
           >
-            <h3 className="font-medium text-sm sm:text-base leading-snug line-clamp-2 min-h-[2.75rem]">
+            <h3
+              title={product.name}
+              className="font-medium text-sm sm:text-base leading-snug line-clamp-2 min-h-[2.75rem]"
+            >
               {product.name}
             </h3>
           </Link>
@@ -178,7 +182,7 @@ export function ProductCard({ product, isAdded, onQuickAdd }: ProductCardProps) 
         <div className="mt-3 pt-3 border-t border-stone-100 flex flex-col gap-2">
           {/* Product Price & MRP */}
           <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-base sm:text-lg font-bold text-stone-900">
+            <span className="text-base sm:text-lg font-semibold text-stone-900">
               ₹{product.price.toLocaleString("en-IN")}
             </span>
             {hasDiscount && (

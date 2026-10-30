@@ -289,7 +289,7 @@ export function AuthModal({
                 setErrorMsg(null);
                 setSuccessMsg(null);
               }}
-              className={`pb-2.5 px-4 text-xs font-bold tracking-wider uppercase transition-colors rounded-none cursor-pointer border-b-2 -mb-[1px] ${
+              className={`pb-2.5 px-4 text-xs font-semibold tracking-wider uppercase transition-colors rounded-none cursor-pointer border-b-2 -mb-[1px] ${
                 mode === "login"
                   ? "border-[#5B6240] text-[#5B6240]"
                   : "border-transparent text-stone-400 hover:text-stone-700"
@@ -304,7 +304,7 @@ export function AuthModal({
                 setErrorMsg(null);
                 setSuccessMsg(null);
               }}
-              className={`pb-2.5 px-4 text-xs font-bold tracking-wider uppercase transition-colors rounded-none cursor-pointer border-b-2 -mb-[1px] ${
+              className={`pb-2.5 px-4 text-xs font-semibold tracking-wider uppercase transition-colors rounded-none cursor-pointer border-b-2 -mb-[1px] ${
                 mode === "signup"
                   ? "border-[#5B6240] text-[#5B6240]"
                   : "border-transparent text-stone-400 hover:text-stone-700"
@@ -316,9 +316,8 @@ export function AuthModal({
 
           {/* Error Message Box */}
           {errorMsg && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-none flex items-start gap-2">
-              <span className="font-bold">Error:</span>
-              <span>{errorMsg}</span>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-none">
+              <span className="leading-relaxed">{errorMsg}</span>
             </div>
           )}
 
@@ -477,7 +476,7 @@ export function AuthModal({
                     setErrorMsg(null);
                     setSuccessMsg(null);
                   }}
-                  className="font-bold text-[#5B6240] hover:underline cursor-pointer"
+                  className="font-semibold text-[#5B6240] hover:underline cursor-pointer"
                 >
                   Sign Up Now
                 </button>
@@ -492,7 +491,7 @@ export function AuthModal({
                     setErrorMsg(null);
                     setSuccessMsg(null);
                   }}
-                  className="font-bold text-[#5B6240] hover:underline cursor-pointer"
+                  className="font-semibold text-[#5B6240] hover:underline cursor-pointer"
                 >
                   Log In Here
                 </button>

@@ -42,6 +42,10 @@ function getAvatarBgColor(name: string): string {
   return AVATAR_PALETTE[index] || AVATAR_PALETTE[0];
 }
 
+// Timing configuration (in milliseconds)
+const TOAST_VISIBLE_DURATION_MS = 8000; // Visible for 8 seconds (increased for comfortable reading)
+const getNextToastDelay = () => 3000 + Math.floor(Math.random() * 1000); // Wait 3 to 4 seconds after hiding
+
 export default function ReviewNotificationToast() {
   const [reviews, setReviews] = useState<ReviewNotification[]>([]);
   const [currentReview, setCurrentReview] = useState<ReviewNotification | null>(null);
@@ -73,18 +77,18 @@ export default function ReviewNotificationToast() {
     setCurrentReview(reviewToShow);
     setIsVisible(true);
 
-    // Auto hide after 6 seconds
+    // Auto hide after visible duration (8 seconds)
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     hideTimerRef.current = setTimeout(() => {
       setIsVisible(false);
 
-      // Wait random interval between minimum 1 second and maximum 5 seconds
-      const randomInterval = 1000 + Math.floor(Math.random() * 4000);
+      // Wait 3 to 4 seconds after hiding before showing the next notification
+      const nextDelay = getNextToastDelay();
       if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
       nextTimerRef.current = setTimeout(() => {
         showNextReview();
-      }, randomInterval);
-    }, 6000);
+      }, nextDelay);
+    }, TOAST_VISIBLE_DURATION_MS);
   }, []);
 
   // Dismiss current notification cleanly
@@ -93,11 +97,11 @@ export default function ReviewNotificationToast() {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current);
 
-    // Schedule next notification: random between minimum 1s and maximum 5s
-    const randomDelay = 1000 + Math.floor(Math.random() * 4000);
+    // Schedule next notification: 3 to 4 seconds
+    const nextDelay = getNextToastDelay();
     nextTimerRef.current = setTimeout(() => {
       showNextReview();
-    }, randomDelay);
+    }, nextDelay);
   }, [showNextReview]);
 
   // Instant notification trigger for user-submitted reviews (logged in or guest)
@@ -121,16 +125,16 @@ export default function ReviewNotificationToast() {
       setIsVisible(true);
     }, 80);
 
-    // Keep visible for 7 seconds
+    // Keep visible for 8 seconds
     hideTimerRef.current = setTimeout(() => {
       setIsVisible(false);
 
-      // Resume regular rotation after random interval (1 to 5 seconds)
-      const randomInterval = 1000 + Math.floor(Math.random() * 4000);
+      // Resume regular rotation after 3 to 4 seconds
+      const nextDelay = getNextToastDelay();
       nextTimerRef.current = setTimeout(() => {
         showNextReview();
-      }, randomInterval);
-    }, 7000);
+      }, nextDelay);
+    }, TOAST_VISIBLE_DURATION_MS);
   }, [showNextReview]);
 
   // Load real reviews across all products from API strictly from database
@@ -144,8 +148,8 @@ export default function ReviewNotificationToast() {
           setReviews(res.data);
           reviewsRef.current = res.data;
 
-          // Start the initial notification after 1.2s, then random 1-5s for subsequent
-          const initialDelay = 1200;
+          // Start the initial notification after 1.5s
+          const initialDelay = 1500;
           nextTimerRef.current = setTimeout(() => {
             if (isMounted) {
               const firstReview = res.data[0];
@@ -156,12 +160,12 @@ export default function ReviewNotificationToast() {
               hideTimerRef.current = setTimeout(() => {
                 if (isMounted) {
                   setIsVisible(false);
-                  const randomInterval = 1000 + Math.floor(Math.random() * 4000);
+                  const nextDelay = getNextToastDelay();
                   nextTimerRef.current = setTimeout(() => {
                     if (isMounted) showNextReview();
-                  }, randomInterval);
+                  }, nextDelay);
                 }
-              }, 6000);
+              }, TOAST_VISIBLE_DURATION_MS);
             }
           }, initialDelay);
         }
@@ -220,7 +224,7 @@ export default function ReviewNotificationToast() {
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[#5B6240]">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#5B6240]">
               {currentReview.isInstantUserSubmission
                 ? "Just Now · New Review"
                 : "Verified Customer Feedback"}
@@ -241,7 +245,7 @@ export default function ReviewNotificationToast() {
         <div className="flex items-start gap-3">
           {/* Avatar: Full round circle with center letter & alphabet-based color */}
           <div
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-white text-base sm:text-lg uppercase shrink-0 shadow-xs select-none"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-semibold text-white text-base sm:text-lg uppercase shrink-0 shadow-xs select-none"
             style={{ backgroundColor: avatarBg }}
           >
             {firstLetter}
@@ -251,7 +255,7 @@ export default function ReviewNotificationToast() {
           <div className="flex-1 min-w-0">
             {/* Customer Name (Line-clamp 1) & Rating Stars */}
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs sm:text-sm font-bold text-stone-900 truncate line-clamp-1">
+              <span className="text-xs sm:text-sm font-semibold text-stone-900 truncate line-clamp-1">
                 {currentReview.name}
                 {currentReview.country && (
                   <span className="text-[10px] text-stone-400 font-normal ml-1">
@@ -277,7 +281,7 @@ export default function ReviewNotificationToast() {
             <Link
               href={`/product/${currentReview.productSlug}`}
               onClick={dismissCurrent}
-              className="text-[11px] font-bold text-[#5B6240] underline underline-offset-3 decoration-[#5B6240] hover:text-[#3E432B] truncate line-clamp-1 block mt-0.5 cursor-pointer"
+              className="text-[11px] font-semibold text-[#5B6240] underline underline-offset-3 decoration-[#5B6240] hover:text-[#3E432B] truncate line-clamp-1 block mt-0.5 cursor-pointer"
               title={`View ${currentReview.productName}`}
             >
               For {currentReview.productName} ↗
